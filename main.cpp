@@ -117,6 +117,7 @@ int main()
 	ourShader.setInt("texture2", 1);
 
 	unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+	glm::mat4 trans = glm::mat4(1.0f);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -128,9 +129,13 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::mat4(1.0f);
 		// trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+		float xtransAmount = static_cast<float>(0.5f * cos(5.0f * glfwGetTime()));
+		// float ytransAmount = static_cast<float>(0.5f * sin(glfwGetTime()));
+		float ytransAmount = 0.0f;
+		trans = glm::translate(trans, glm::vec3(xtransAmount, ytransAmount, 0.0f));
+		// trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 		
         glBindVertexArray(VAO);
