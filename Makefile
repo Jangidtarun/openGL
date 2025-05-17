@@ -9,5 +9,8 @@ CC = g++
 $(OUT): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) $(STBI) $(GLAD) -o $(OUT) $(LIBS)
 
+run:
+	./$(OUT)
+
 clean:
 	rm -f $(OUT)
