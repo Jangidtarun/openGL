@@ -10,6 +10,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
+void set_uniform_mat4fv(unsigned int shaderid, const GLchar *uniform_name, glm::mat4 uniform_val);
 
 
 // settings
@@ -129,6 +130,10 @@ int main()
 	float aspect_ratio = (float) SCR_WIDTH / SCR_HEIGHT;
 	glm::mat4 projection = glm::perspective(glm::radians(fov_angle), aspect_ratio, 0.1f, 100.0f);
 
+	set_uniform_mat4fv(ourShader.ID, "model", model);
+	set_uniform_mat4fv(ourShader.ID, "view", view);
+	set_uniform_mat4fv(ourShader.ID, "projection", projection);
+
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -172,4 +177,9 @@ void processInput(GLFWwindow *window)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void set_uniform_mat4fv(unsigned int shaderid, const GLchar *uniform_name, glm::mat4 uniform_val) {
+	int uniform_loc = glGetUniformLocation(shaderid, uniform_name);
+	glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(uniform_val));
 }
