@@ -1,12 +1,14 @@
 CFLAGS = -Wall
-LIBS = -lglfw -lGL -Iinclude
-SRC = main.cpp
+LIBS = -lglfw -lGL -ldl -Iinclude
+SRC = main.c
+OUT = main
+CC = gcc
 GLAD = src/glad.c
-OUT = main.out
-CC = g++
+
 
 $(OUT): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) $(GLAD) -o $(OUT) $(LIBS)
+	$(CC) $(CFLAGS) $(SRC) $(GLAD) $(LIBS) -o $(OUT)
+
 
 clean:
 	rm -f $(OUT)
