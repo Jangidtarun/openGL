@@ -22,6 +22,13 @@ const char *fragmentShaderSource = "#version 330 core\n"
 	"}\0";
 
 
+const char *fragmentShaderSource_yellow = "#version 330 core\n"
+	"out vec4 fragColor;\n"
+	"void main() {\n"
+	"	fragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+	"}\0";
+
+
 int main() {
 	if (!glfwInit()) {
 		fprintf(stderr, "Failed to initialize GLFW\n");
@@ -49,16 +56,16 @@ int main() {
 
 	float vertices1[] = {
 		// left triangle
-		-0.5, 0.5, 0.0,
 		-0.5, 0.0, 0.0,
+		-0.5, 0.5, 0.0,
 		0.0, 0.0, 0.0
 	};
 
 	float vertices2[] = {
 		// right triangle
 		0.0, 0.0, 0.0,
-		0.5, 0.0, 0.0,
-		0.5, 0.5, 0.0
+		0.5, 0.5, 0.0,
+		0.5, 0.0, 0.0
 	};
 
 	GLuint vertexShader;
@@ -117,6 +124,7 @@ int main() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
 
+	// second triangle setup
 	glBindVertexArray(VAO[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
@@ -125,7 +133,7 @@ int main() {
 
 	glUseProgram(shaderProgram);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
