@@ -10,15 +10,18 @@ const unsigned int WINDOW_HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+	"out vec4 frag_color;"
     "void main() {\n"
     "   gl_Position = vec4(aPos, 1.0);\n"
+	"	frag_color = vec4(0.5, 0.0, 0.0, 1.0);\n"
     "}\0";
 
 
 const char *fragmentShaderSource = "#version 330 core\n"
 	"out vec4 fragColor;\n"
+	"in vec4 frag_color;\n"
 	"void main() {\n"
-	"	fragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+	"	fragColor = frag_color;\n"
 	"}\0";
 
 
@@ -120,7 +123,7 @@ int main() {
 
 	glUseProgram(shaderProgram);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
