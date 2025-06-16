@@ -1,5 +1,5 @@
 CFLAGS = -Wall
-LIBS = -lglfw -lGL -ldl -Iinclude
+LIBS = -lglfw -lGL -ldl -Iinclude -lm
 SRC = main.c
 OUT = main
 CC = gcc
