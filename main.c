@@ -1,6 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <stdio.h>
+#include <math.h>
 
 #define INFO_LOG_SIZE 512
 
@@ -10,18 +12,16 @@ const unsigned int WINDOW_HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
-	"out vec4 frag_color;"
     "void main() {\n"
     "   gl_Position = vec4(aPos, 1.0);\n"
-	"	frag_color = vec4(0.5, 0.0, 0.0, 1.0);\n"
     "}\0";
 
 
 const char *fragmentShaderSource = "#version 330 core\n"
 	"out vec4 fragColor;\n"
-	"in vec4 frag_color;\n"
+	"uniform vec4 ourColor;\n"
 	"void main() {\n"
-	"	fragColor = frag_color;\n"
+	"	fragColor = ourColor;\n"
 	"}\0";
 
 
@@ -128,6 +128,11 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		float timeValue = glfwGetTime();
+		float greenValue = sin(timeValue) / 2.0 + 0.5;
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+		glUniform4f(vertexColorLocation, 0.8, greenValue, 0.6, 1.0);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
