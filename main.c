@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "helper.h"
+#include "error_codes.h"
 
 #define INFO_LOG_SIZE 512
 
@@ -14,27 +15,37 @@ const unsigned int WINDOW_HEIGHT = 600;
 const char *vertexShaderSource_path = "shader.vert";
 const char *fragmentShaderSource_path = "shader.frag";
 
-int main() {
+
+int init_opengl() {
 	if (!glfwInit()) {
 		fprintf(stderr, "Failed to initialize GLFW\n");
-		return -1;
+		return 0;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Win1", NULL, NULL);
+	return 1;
+}
+
+int main() {
+
+	if (!init_opengl()) {
+		return GLFW_INIT_FAILED;
+	}
+
+	GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
 	if (!window) {
 		fprintf(stderr, "Failed to create GLFW window\n");
 		glfwTerminate();
-		return -1;
+		return GLFW_WINDOW_CREATE_FAILED;
 	}
 	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		fprintf(stderr, "Failed to initialize GLAD\n");
-		return -1;
+		return GLAD_INIT_FAILED;
 	}
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
