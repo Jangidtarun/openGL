@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "helper.h"
+#include "shader.h"
 #include "error_codes.h"
 
 #define INFO_LOG_SIZE 512
@@ -50,53 +50,14 @@ int main() {
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	// vertex shader
-	GLuint vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
 	const char *vertexShaderSource = load_shader(vertexShaderSource_path);
-
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	int success;
-	char infoLog[INFO_LOG_SIZE];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "ERROR:SHADER:VERTEX:COMPILATION FAILED\n%s\n", infoLog);
-	}
-
-	// fragment shader
-	GLuint fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
 	const char *fragmentShaderSource = load_shader(fragmentShaderSource_path);
 
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
+	unsigned int vertexShader = compile_vertex_shader(vertexShaderSource);
 
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	unsigned int fragmentShader = compile_fragment_shader(fragmentShaderSource);
 
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "ERROR:SHADER:FRAGMENT:COMPILATION FAILED\n%s\n", infoLog);
-	}
-
-	// shader program
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "ERROR:PROGRAM:SHADER:LINKING FAILED\n%s\n", infoLog);
-	}
+	unsigned int shaderProgram = create_shader_program(vertexShader, fragmentShader);
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
@@ -108,8 +69,8 @@ int main() {
          0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top
     };
 
-	GLuint VBO;
-	GLuint VAO;
+	unsigned int VBO;
+	unsigned int VAO;
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
