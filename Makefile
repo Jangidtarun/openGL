@@ -9,6 +9,5 @@ GLAD = src/glad.c
 $(OUT): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) $(GLAD) $(LIBS) -o $(OUT)
 
-
 clean:
 	rm -f $(OUT)
