@@ -67,10 +67,10 @@ int main() {
 
     float vertices[] = {
 		// positions          // colors           // texture coords
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.55f, 0.55f,   // top right
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.55f, 0.45f,   // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.45f, 0.45f,   // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.45f, 0.55f    // top left
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
 	};
 
 	unsigned int indices[] = { // note that we start from 0!
@@ -157,10 +157,28 @@ int main() {
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
+	unsigned int mixAmount_uniform_location = glGetUniformLocation(shaderProgram, "mixAmount");
+	float mix_amount = 0.2;
+
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+			mix_amount += 0.01;
+			if (mix_amount > 1.0) {
+				mix_amount = 1.0;
+			}
+		} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+			mix_amount -= 0.01;
+			if (mix_amount < 0.0) {
+				mix_amount = 0.0;
+			}
+		}
+
+		glUniform1f(mixAmount_uniform_location, mix_amount);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
