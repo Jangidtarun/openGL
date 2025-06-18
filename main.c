@@ -12,6 +12,7 @@
 
 #define INFO_LOG_SIZE 512
 
+
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
@@ -19,7 +20,6 @@ const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
 const char *texture1_path = "textures/container.jpg";
 const char *texture2_path = "textures/awesomeface.png";
-
 
 int init_opengl() {
 	if (!glfwInit()) {
@@ -162,8 +162,6 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
