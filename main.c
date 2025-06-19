@@ -1,14 +1,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <cglm/cglm.h>
+#include <cglm/types.h>
+
 #include <stdio.h>
 #include <math.h>
 
+#include "texture.h"
 #include "shader.h"
 #include "error_codes.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 #define INFO_LOG_SIZE 512
 
@@ -18,8 +19,8 @@ const unsigned int WINDOW_HEIGHT = 600;
 
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
-const char *texture1_path = "textures/container.jpg";
-const char *texture2_path = "textures/awesomeface.png";
+const char *texture1_path = "textures/img1.jpeg";
+const char *texture2_path = "textures/img3.jpeg";
 
 int init_opengl() {
 	if (!glfwInit()) {
@@ -117,18 +118,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(GL_TRUE);
-	unsigned char *data = stbi_load(texture1_path, &width, &height, &nrChannels, 0);
-
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		fprintf(stderr, "Failed to load texture %s\n", texture1_path);
-	}
-
-	stbi_image_free(data);
+	make_texture(texture1_path, JPG_TEX);
 
 	unsigned int texture2;
 	glGenTextures(1, &texture2);
@@ -141,16 +131,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	data = stbi_load(texture2_path, &width, &height, &nrChannels, 0);
-
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		fprintf(stderr, "Failed to load texture %s\n", texture2_path);
-	}
-
-	stbi_image_free(data);
+	make_texture(texture2_path, JPG_TEX);
 
 	glUseProgram(shaderProgram);
 
@@ -160,10 +141,19 @@ int main() {
 	unsigned int mixAmount_uniform_location = glGetUniformLocation(shaderProgram, "mixAmount");
 	float mix_amount = 0.2;
 
+
+	unsigned int transform_uniform_location = glGetUniformLocation(shaderProgram, "transform");
+
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		mat4 trans;
+		glm_mat4_identity(trans);
+		glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+		glm_rotate(trans, 0.1 * (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
+		glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 			mix_amount += 0.01;
