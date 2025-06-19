@@ -1,6 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <cglm/cglm.h>
+#include <cglm/types.h>
+
 #include <stdio.h>
 #include <math.h>
 
@@ -137,6 +140,14 @@ int main() {
 
 	unsigned int mixAmount_uniform_location = glGetUniformLocation(shaderProgram, "mixAmount");
 	float mix_amount = 0.2;
+
+	mat4 trans;
+	glm_mat4_identity(trans);
+	glm_rotate(trans, GLM_PI / 2.0, (vec3){0.0, 0.0, 1.0});
+	glm_scale(trans, (vec3){0.5, 0.5, 0.5});
+
+	unsigned int transform_uniform_location = glGetUniformLocation(shaderProgram, "transform");
+	glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
