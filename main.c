@@ -151,8 +151,8 @@ int main() {
 
 		mat4 trans;
 		glm_mat4_identity(trans);
+		glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
 		glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
-		glm_rotate(trans, 0.1 * (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
 		glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
