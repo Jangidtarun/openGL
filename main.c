@@ -147,12 +147,12 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		mat4 trans;
 		glm_mat4_identity(trans);
-		glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
 		glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+		glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
 		glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -166,6 +166,14 @@ int main() {
 				mix_amount = 0.0;
 			}
 		}
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glm_mat4_identity(trans);
+		glm_translate(trans, (vec3){-0.5f, 0.5f, 0.0f});
+		float scale_amount = 0.5 * (float)sin(glfwGetTime()) + 0.5f;
+		glm_scale(trans, (vec3){scale_amount, scale_amount, scale_amount});
+		glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 		glUniform1f(mixAmount_uniform_location, mix_amount);
 
