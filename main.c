@@ -4,11 +4,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "texture.h"
 #include "shader.h"
 #include "error_codes.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 #define INFO_LOG_SIZE 512
 
@@ -117,18 +115,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(GL_TRUE);
-	unsigned char *data = stbi_load(texture1_path, &width, &height, &nrChannels, 0);
-
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		fprintf(stderr, "Failed to load texture %s\n", texture1_path);
-	}
-
-	stbi_image_free(data);
+	make_texture(texture1_path, JPG_TEX);
 
 	unsigned int texture2;
 	glGenTextures(1, &texture2);
@@ -141,16 +128,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	data = stbi_load(texture2_path, &width, &height, &nrChannels, 0);
-
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		fprintf(stderr, "Failed to load texture %s\n", texture2_path);
-	}
-
-	stbi_image_free(data);
+	make_texture(texture2_path, PNG_TEX);
 
 	glUseProgram(shaderProgram);
 
