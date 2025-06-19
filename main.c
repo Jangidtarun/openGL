@@ -141,18 +141,19 @@ int main() {
 	unsigned int mixAmount_uniform_location = glGetUniformLocation(shaderProgram, "mixAmount");
 	float mix_amount = 0.2;
 
-	mat4 trans;
-	glm_mat4_identity(trans);
-	glm_rotate(trans, GLM_PI / 2.0, (vec3){0.0, 0.0, 1.0});
-	glm_scale(trans, (vec3){0.5, 0.5, 0.5});
 
 	unsigned int transform_uniform_location = glGetUniformLocation(shaderProgram, "transform");
-	glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		mat4 trans;
+		glm_mat4_identity(trans);
+		glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+		glm_rotate(trans, 0.1 * (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
+		glUniformMatrix4fv(transform_uniform_location, 1, GL_FALSE, (const float *)trans);
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 			mix_amount += 0.01;
