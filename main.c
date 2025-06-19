@@ -54,6 +54,8 @@ int main() {
 		return GLAD_INIT_FAILED;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	const char *vertexShaderSource = load_shader(vertexShaderSource_path);
@@ -185,7 +187,7 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
