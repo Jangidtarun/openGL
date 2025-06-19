@@ -1,8 +1,3 @@
-<<<<<<< HEAD
 *.out
 main
 settings.json
-=======
-main
-vgcore.*
->>>>>>> origin/main
