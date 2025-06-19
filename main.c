@@ -19,8 +19,8 @@ const unsigned int WINDOW_HEIGHT = 600;
 
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
-const char *texture1_path = "textures/container.jpg";
-const char *texture2_path = "textures/awesomeface.png";
+const char *texture1_path = "textures/img1.jpeg";
+const char *texture2_path = "textures/img3.jpeg";
 
 int init_opengl() {
 	if (!glfwInit()) {
@@ -131,7 +131,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	make_texture(texture2_path, PNG_TEX);
+	make_texture(texture2_path, JPG_TEX);
 
 	glUseProgram(shaderProgram);
 
