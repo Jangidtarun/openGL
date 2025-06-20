@@ -167,19 +167,23 @@ int main() {
 	unsigned int view_uniform_location = glGetUniformLocation(shaderProgram, "view");
 	unsigned int projection_uniform_location = glGetUniformLocation(shaderProgram, "projection");
 
-	mat4 model;
-
-	mat4 view;
-	glm_mat4_identity(view);
-	glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
-	glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
-
-	mat4 projection;
-	glm_mat4_identity(projection);
-
 	float mix_amount = 0.4;
 	float fovy = GLM_PI_4f;
 	float aspect_ratio = (float) WINDOW_WIDTH / WINDOW_HEIGHT;
+
+	vec3 vv;
+	vv[0] =  0.0;
+	vv[1] =  0.0;
+	vv[2] = -3.0;
+
+	mat4 model;
+
+	mat4 view;
+
+	mat4 projection;
+	glm_mat4_identity(projection);
+	glm_perspective(fovy, aspect_ratio, 0.1f, 100.0f, projection);
+	glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
 
 	vec3 cubePositions[] = {
 		{ 0.0f,  0.0f,   0.0f},
@@ -207,23 +211,30 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		glm_perspective(fovy, aspect_ratio, 0.1f, 100.0f, projection);
-		glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
+		glm_mat4_identity(view);
+		glm_translate(view, vv);
+		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 			mix_amount += 0.01;
-			// fovy += 0.1;
-			aspect_ratio *= 1.1;
 			if (mix_amount > 1.0) {
 				mix_amount = 1.0;
 			}
 		} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			mix_amount -= 0.01;
-			// fovy -= 0.1;
-			aspect_ratio *= 0.9;
 			if (mix_amount < 0.0) {
 				mix_amount = 0.0;
 			}
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+			vv[1] -= 0.1;
+		} else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+			vv[1] += 0.1;
+		} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			vv[0] -= 0.1;
+		} else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			vv[0] += 0.1;
 		}
 
 		glUniform1f(mixAmount_uniform_location, mix_amount);
