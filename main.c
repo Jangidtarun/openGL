@@ -206,6 +206,13 @@ int main() {
 			glm_mat4_identity(model);
 			glm_translate(model, cubePositions[i]);
 			float angle = GLM_PI_4f * i;
+			if (i % 3 == 0) {
+				if (i == 0) {
+					angle = (float) glfwGetTime() * GLM_PI_4f;
+				} else {
+					angle *= (float) glfwGetTime();
+				}
+			}
 			glm_rotate(model, angle, (vec3){1.0f, 0.5f, 0.3f});
 			glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, (const float *)model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
