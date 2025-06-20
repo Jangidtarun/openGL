@@ -13,7 +13,6 @@
 
 #define INFO_LOG_SIZE 512
 
-
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
@@ -67,8 +66,6 @@ int main() {
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-
-
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -159,7 +156,6 @@ int main() {
 
 	make_texture(texture2_path, JPG_TEX);
 
-
 	glUseProgram(shaderProgram);
 
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
@@ -184,17 +180,31 @@ int main() {
 	glm_perspective(GLM_PI_4, (float)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, projection);
 	glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
 
+	vec3 cubePositions[] = {
+		{ 0.0f,  0.0f,   0.0f},
+		{ 2.0f,  5.0f, -15.0f},
+		{-1.5f, -2.2f,  -2.5f},
+		{-3.8f, -2.0f, -12.3f},
+		{ 2.4f, -0.4f,  -3.5f},
+		{-1.7f,  3.0f,  -7.5f},
+		{ 1.3f, -2.0f,  -2.5f},
+		{ 1.5f,  2.0f,  -2.5f},
+		{ 1.5f,  0.2f,  -1.5f},
+		{-1.3f,  1.0f,  -1.5f}
+	};
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		glm_mat4_identity(model);
-		glm_rotate(model, (float)glfwGetTime() * GLM_PI_4f, (vec3){1.0f, 0.5f, 0.3f});
-		glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, (const float *)model);
-
+		for (int i = 0; i < 10; i++) {
+			glm_mat4_identity(model);
+			glm_translate(model, cubePositions[i]);
+			float angle = GLM_PI_4f * i;
+			glm_rotate(model, angle, (vec3){1.0f, 0.5f, 0.3f});
+			glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, (const float *)model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 			mix_amount += 0.01;
