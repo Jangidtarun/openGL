@@ -170,10 +170,6 @@ int main() {
 
 	mat4 model;
 
-	mat4 view;
-	glm_mat4_identity(view);
-	glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
-	glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
 
 	mat4 projection;
 	glm_mat4_identity(projection);
@@ -217,6 +213,13 @@ int main() {
 				mix_amount = 0.0;
 			}
 		}
+
+		mat4 view;
+		const float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		glm_lookat((vec3){camX, 0.0f, camZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
+		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
 
 		glUniform1f(mixAmount_uniform_location, mix_amount);
 
