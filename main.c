@@ -19,6 +19,8 @@ const unsigned int WINDOW_HEIGHT = 600;
 vec3 cam_pos = {0.0f, 0.0f, 3.0f};
 vec3 cam_front = {0.0f, 0.0f, -1.0f};
 vec3 cam_up = {0.0f, 1.0f, 0.0f};
+float delta_time = 0.0f;
+float last_frame = 0.0f;
 
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
@@ -203,6 +205,10 @@ int main() {
 		glm_lookat(cam_pos, cam_target, cam_up, view);
 		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
 
+		float current_frame = glfwGetTime();
+		delta_time = current_frame - last_frame;
+		last_frame = current_frame;
+
 		processInput(window);
 
 		glfwSwapBuffers(window);
@@ -219,8 +225,9 @@ int main() {
 
 
 void processInput(GLFWwindow *window) {
-	const float cam_speed = 0.1f;
+	const float cam_speed = 2.5f * delta_time;
 	vec3 tmp;
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		glm_vec3_scale(cam_front, cam_speed, tmp);
 		glm_vec3_add(cam_pos, tmp, cam_pos);
