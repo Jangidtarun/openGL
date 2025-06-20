@@ -16,23 +16,17 @@
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
+vec3 cam_pos = {0.0f, 0.0f, 3.0f};
+vec3 cam_front = {0.0f, 0.0f, -1.0f};
+vec3 cam_up = {0.0f, 1.0f, 0.0f};
+
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
 const char *texture1_path = "textures/img1.jpeg";
 const char *texture2_path = "textures/img3.jpeg";
 
-int init_opengl() {
-	if (!glfwInit()) {
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		return 0;
-	}
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	return 1;
-}
+void processInput(GLFWwindow *window);
+int init_opengl();
 
 int main() {
 
@@ -163,6 +157,7 @@ int main() {
 
 	unsigned int mixAmount_uniform_location = glGetUniformLocation(shaderProgram, "mixAmount");
 	float mix_amount = 0.4;
+	glUniform1f(mixAmount_uniform_location, mix_amount);
 
 	unsigned int model_uniform_location = glGetUniformLocation(shaderProgram, "model");
 	unsigned int view_uniform_location = glGetUniformLocation(shaderProgram, "view");
@@ -170,10 +165,9 @@ int main() {
 
 	mat4 model;
 
-
 	mat4 projection;
 	glm_mat4_identity(projection);
-	glm_perspective(GLM_PI_4, (float)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, projection);
+	glm_perspective(GLM_PI_4, (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, projection);
 	glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
 
 	vec3 cubePositions[] = {
@@ -189,6 +183,9 @@ int main() {
 		{-1.3f,  1.0f,  -1.5f}
 	};
 
+	vec3 cam_target;
+	glm_vec3_add(cam_pos, cam_front, cam_target);
+
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -202,26 +199,11 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-			mix_amount += 0.01;
-			if (mix_amount > 1.0) {
-				mix_amount = 1.0;
-			}
-		} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-			mix_amount -= 0.01;
-			if (mix_amount < 0.0) {
-				mix_amount = 0.0;
-			}
-		}
-
 		mat4 view;
-		const float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-		glm_lookat((vec3){camX, 0.0f, camZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
+		glm_lookat(cam_pos, cam_target, cam_up, view);
 		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
 
-		glUniform1f(mixAmount_uniform_location, mix_amount);
+		processInput(window);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -233,4 +215,41 @@ int main() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
+}
+
+
+void processInput(GLFWwindow *window) {
+	const float cam_speed = 0.1f;
+	vec3 tmp;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		glm_vec3_scale(cam_front, cam_speed, tmp);
+		glm_vec3_add(cam_pos, tmp, cam_pos);
+	} else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		glm_vec3_scale(cam_front, cam_speed, tmp);
+		glm_vec3_sub(cam_pos, tmp, cam_pos);
+	} else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		glm_vec3_cross(cam_front, cam_up, tmp);
+		glm_vec3_normalize(tmp);
+		glm_vec3_scale(tmp, cam_speed, tmp);
+		glm_vec3_sub(cam_pos, tmp, cam_pos);
+	} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		glm_vec3_cross(cam_front, cam_up, tmp);
+		glm_vec3_normalize(tmp);
+		glm_vec3_scale(tmp, cam_speed, tmp);
+		glm_vec3_add(cam_pos, tmp, cam_pos);
+	}
+}
+
+
+int init_opengl() {
+	if (!glfwInit()) {
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		return 0;
+	}
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	return 1;
 }
