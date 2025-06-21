@@ -15,12 +15,20 @@
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
+const float MAX_PITCH = 89.0f;
 
 vec3 cam_pos = {0.0f, 0.0f, 3.0f};
 vec3 cam_front = {0.0f, 0.0f, -1.0f};
 vec3 cam_up = {0.0f, 1.0f, 0.0f};
+
 float delta_time = 0.0f;
 float last_frame = 0.0f;
+
+bool first_mouse = true;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float mouse_last_x = WINDOW_WIDTH / 2.0f;
+float mouse_last_y = WINDOW_HEIGHT / 2.0f;
 
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
@@ -29,6 +37,7 @@ const char *texture2_path = "textures/img3.jpeg";
 
 void processInput(GLFWwindow *window);
 int init_opengl();
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 
 int main() {
 
@@ -49,6 +58,8 @@ int main() {
 		return GLAD_INIT_FAILED;
 	}
 
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glEnable(GL_DEPTH_TEST);
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -185,8 +196,6 @@ int main() {
 		{-1.3f,  1.0f,  -1.5f}
 	};
 
-	vec3 cam_target;
-	glm_vec3_add(cam_pos, cam_front, cam_target);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -202,6 +211,8 @@ int main() {
 		}
 
 		mat4 view;
+		vec3 cam_target;
+		glm_vec3_add(cam_pos, cam_front, cam_target);
 		glm_lookat(cam_pos, cam_target, cam_up, view);
 		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
 
@@ -224,9 +235,46 @@ int main() {
 }
 
 
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+	if (first_mouse) {
+		mouse_last_x = xpos;
+		mouse_last_y = ypos;
+		first_mouse = false;
+	}
+
+	float xoffset = (float) xpos - mouse_last_x;
+	float yoffset = mouse_last_y - (float) ypos;
+	mouse_last_x = (float) xpos;
+	mouse_last_y = (float) ypos;
+
+	const float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+	if (pitch > MAX_PITCH) {
+		pitch = MAX_PITCH;
+	} else if (pitch < -MAX_PITCH) {
+		pitch = -MAX_PITCH;
+	}
+
+	vec3 dir;
+	dir[0] = cos(glm_rad(yaw)) * cos(glm_rad(pitch));
+	dir[1] = sin(glm_rad(pitch));
+	dir[2] = sin(glm_rad(yaw)) * cos(glm_rad(pitch));
+	glm_normalize(dir);
+	glm_vec3_copy(dir, cam_front);
+}
+
+
 void processInput(GLFWwindow *window) {
 	const float cam_speed = 2.5f * delta_time;
 	vec3 tmp;
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, 1);
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		glm_vec3_scale(cam_front, cam_speed, tmp);
