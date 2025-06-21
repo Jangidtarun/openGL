@@ -16,6 +16,8 @@
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 const float MAX_PITCH = 89.0f;
+const float MAX_ZOOM = 45.0f;
+const float MIN_ZOOM = 1.0f;
 
 vec3 cam_pos = {0.0f, 0.0f, 3.0f};
 vec3 cam_front = {0.0f, 0.0f, -1.0f};
@@ -29,6 +31,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float mouse_last_x = WINDOW_WIDTH / 2.0f;
 float mouse_last_y = WINDOW_HEIGHT / 2.0f;
+float zoom = 0;
 
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
@@ -38,6 +41,7 @@ const char *texture2_path = "textures/img3.jpeg";
 void processInput(GLFWwindow *window);
 int init_opengl();
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 int main() {
 
@@ -59,6 +63,8 @@ int main() {
 	}
 
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, mouse_scroll_callback);
+
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glEnable(GL_DEPTH_TEST);
 
@@ -178,10 +184,6 @@ int main() {
 
 	mat4 model;
 
-	mat4 projection;
-	glm_mat4_identity(projection);
-	glm_perspective(GLM_PI_4, (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, projection);
-	glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
 
 	vec3 cubePositions[] = {
 		{ 0.0f,  0.0f,   0.0f},
@@ -220,6 +222,12 @@ int main() {
 		delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
+		mat4 projection;
+		glm_mat4_identity(projection);
+		float fov = zoom;
+		glm_perspective(glm_rad(fov), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, projection);
+		glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
+
 		processInput(window);
 
 		glfwSwapBuffers(window);
@@ -232,6 +240,16 @@ int main() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
+}
+
+
+void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+	zoom -= (float) yoffset;
+	if (zoom > MAX_ZOOM) {
+		zoom = MAX_ZOOM;
+	} else if (zoom < MIN_ZOOM) {
+		zoom = MIN_ZOOM;
+	}
 }
 
 
@@ -269,7 +287,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 
 
 void processInput(GLFWwindow *window) {
-	const float cam_speed = 2.5f * delta_time;
+	const float cam_speed = 5.0f * delta_time;
 	vec3 tmp;
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
