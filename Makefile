@@ -1,13 +1,14 @@
-CFLAGS = -Wall
-LIBS = -lglfw -lGL -ldl -Iinclude -lm
-SRC = main.c
-OUT = main
-CC = gcc
-GLAD = src/glad.c
+CFLAGS 	= -Wall
+LIBS 	= -lglfw -lGL -ldl -Iinclude -lm
+SRC 	= main.cpp
+OUT 	= main
+CC 		= g++
+GLAD 	= src/glad.c
+CAMERA	= camera.cpp
 
 
 $(OUT): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) $(GLAD) $(LIBS) -o $(OUT)
+	$(CC) $(CFLAGS) $(SRC) $(CAMERA) $(GLAD) $(LIBS) -o $(OUT)
 
 clean:
 	rm -f $(OUT)
