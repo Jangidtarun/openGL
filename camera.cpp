@@ -77,10 +77,7 @@ void get_cam_mouse_input(CAMERA *cam, float xoffset, float yoffset, bool constra
     cam->pitch	+= yoffset;
 
     if (constrain_pitch) {
-        if (cam->pitch > PITCH_CONSTRAIN)
-            cam->pitch = PITCH_CONSTRAIN;
-        if (cam->pitch < -PITCH_CONSTRAIN)
-            cam->pitch = -PITCH_CONSTRAIN;
+		cam->pitch = clamp(cam->pitch, -PITCH_CONSTRAIN, PITCH_CONSTRAIN);
     }
 
     update_cam_vecs(cam);
