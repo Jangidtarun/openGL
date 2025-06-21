@@ -55,16 +55,20 @@ glm::mat4 get_view_matrix(CAMERA *cam) {
 void get_cam_keyboard_input(CAMERA *cam, CAMERA_MOVEMENTS direction, float delta_time) {
     float velocity = cam->move_speed * delta_time;
     if (direction == FORWARD) {
-        cam->position += cam->front * velocity;
+		cam->position.x += cam->front.x * velocity;
+		cam->position.z += cam->front.z * velocity;
     }
     if (direction == BACKWARD) {
-        cam->position -= cam->front * velocity;
+		cam->position.x -= cam->front.x * velocity;
+		cam->position.z -= cam->front.z * velocity;
     }
     if (direction == LEFT) {
-        cam->position -= cam->right * velocity;
+		cam->position.x -= cam->right.x * velocity;
+		cam->position.z -= cam->right.z * velocity;
     }
     if (direction == RIGHT) {
-        cam->position += cam->right * velocity;
+		cam->position.x += cam->right.x * velocity;
+		cam->position.z += cam->right.z * velocity;
     }
 }
 
