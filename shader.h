@@ -1,5 +1,5 @@
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <stdio.h>
 #include <stdlib.h>
