@@ -1,11 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <cglm/cglm.h>
-#include <cglm/types.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-#include <stdio.h>
-#include <math.h>
+#include <iostream>
 
 #include "texture.h"
 #include "shader.h"
@@ -13,35 +13,44 @@
 
 #define INFO_LOG_SIZE 512
 
+// settings
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 const float MAX_PITCH = 89.0f;
 const float MAX_ZOOM = 45.0f;
 const float MIN_ZOOM = 1.0f;
 
-vec3 cam_pos = {0.0f, 0.0f, 3.0f};
-vec3 cam_front = {0.0f, 0.0f, -1.0f};
-vec3 cam_up = {0.0f, 1.0f, 0.0f};
-
-float delta_time = 0.0f;
-float last_frame = 0.0f;
+// camera
+glm::vec3 cam_pos 	= glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cam_front = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cam_up 	= glm::vec3(0.0f, 1.0f,  0.0f);
 
 bool first_mouse = true;
 float yaw = -90.0f;
 float pitch = 0.0f;
 float mouse_last_x = WINDOW_WIDTH / 2.0f;
 float mouse_last_y = WINDOW_HEIGHT / 2.0f;
-float zoom = 0;
+float fov = 45.0f;
 
+// timing
+float delta_time = 0.0f;
+float last_frame = 0.0f;
+
+// filepath constants
 const char *vertexShaderSource_path = "shaders/shader.vert";
 const char *fragmentShaderSource_path = "shaders/shader.frag";
 const char *texture1_path = "textures/img1.jpeg";
 const char *texture2_path = "textures/img3.jpeg";
 
+// prototypes
 void processInput(GLFWwindow *window);
-int init_opengl();
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+GLFWwindow *create_window(const unsigned int width, const unsigned int height, const char *title);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void enable_glfw_params();
+bool init_opengl();
+
 
 int main() {
 
@@ -49,26 +58,18 @@ int main() {
 		return GLFW_INIT_FAILED;
 	}
 
-	GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow *window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL");
 	if (!window) {
-		fprintf(stderr, "Failed to create GLFW window\n");
-		glfwTerminate();
 		return GLFW_WINDOW_CREATE_FAILED;
 	}
-	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		fprintf(stderr, "Failed to initialize GLAD\n");
+		std::cout << "Failed to initialize GLAD\n";
 		return GLAD_INIT_FAILED;
 	}
 
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, mouse_scroll_callback);
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glEnable(GL_DEPTH_TEST);
-
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	enable_glfw_params();
 
 	const char *vertexShaderSource = load_shader(vertexShaderSource_path);
 	const char *fragmentShaderSource = load_shader(fragmentShaderSource_path);
@@ -82,16 +83,16 @@ int main() {
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
@@ -102,26 +103,39 @@ int main() {
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
 		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3( 0.0f,  0.0f,   0.0f),
+		glm::vec3( 2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f,  -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3( 2.4f, -0.4f,  -3.5f),
+		glm::vec3(-1.7f,  3.0f,  -7.5f),
+		glm::vec3( 1.3f, -2.0f,  -2.5f),
+		glm::vec3( 1.5f,  2.0f,  -2.5f),
+		glm::vec3( 1.5f,  0.2f,  -1.5f),
+		glm::vec3(-1.3f,  1.0f,  -1.5f)
 	};
 
 	unsigned int VBO;
@@ -170,7 +184,6 @@ int main() {
 	make_texture(texture2_path, JPG_TEX);
 
 	glUseProgram(shaderProgram);
-
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
@@ -182,53 +195,30 @@ int main() {
 	unsigned int view_uniform_location = glGetUniformLocation(shaderProgram, "view");
 	unsigned int projection_uniform_location = glGetUniformLocation(shaderProgram, "projection");
 
-	mat4 model;
-
-
-	vec3 cubePositions[] = {
-		{ 0.0f,  0.0f,   0.0f},
-		{ 2.0f,  5.0f, -15.0f},
-		{-1.5f, -2.2f,  -2.5f},
-		{-3.8f, -2.0f, -12.3f},
-		{ 2.4f, -0.4f,  -3.5f},
-		{-1.7f,  3.0f,  -7.5f},
-		{ 1.3f, -2.0f,  -2.5f},
-		{ 1.5f,  2.0f,  -2.5f},
-		{ 1.5f,  0.2f,  -1.5f},
-		{-1.3f,  1.0f,  -1.5f}
-	};
-
-
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		processInput(window);
 
-		for (int i = 0; i < 10; i++) {
-			glm_mat4_identity(model);
-			glm_translate(model, cubePositions[i]);
-			float angle = GLM_PI_4f * i;
-			glm_rotate(model, angle, (vec3){1.0f, 0.5f, 0.3f});
-			glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, (const float *)model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-		mat4 view;
-		vec3 cam_target;
-		glm_vec3_add(cam_pos, cam_front, cam_target);
-		glm_lookat(cam_pos, cam_target, cam_up, view);
-		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, (const float *)view);
-
-		float current_frame = glfwGetTime();
+		float current_frame = static_cast<float>(glfwGetTime());
 		delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
-		mat4 projection;
-		glm_mat4_identity(projection);
-		float fov = zoom;
-		glm_perspective(glm_rad(fov), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, projection);
-		glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, (const float *)projection);
+		glm::mat4 projection = glm::perspective(glm::radians(fov), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+		glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, glm::value_ptr(projection));
 
-		processInput(window);
+		glm::mat4 view = glm::lookAt(cam_pos, cam_pos + cam_front, cam_up);
+		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, glm::value_ptr(view));
+
+		for (int i = 0; i < 10; i++) {
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -244,11 +234,11 @@ int main() {
 
 
 void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-	zoom -= (float) yoffset;
-	if (zoom > MAX_ZOOM) {
-		zoom = MAX_ZOOM;
-	} else if (zoom < MIN_ZOOM) {
-		zoom = MIN_ZOOM;
+	fov -= (float) yoffset;
+	if (fov > MAX_ZOOM) {
+		fov = MAX_ZOOM;
+	} else if (fov < MIN_ZOOM) {
+		fov = MIN_ZOOM;
 	}
 }
 
@@ -277,52 +267,72 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 		pitch = -MAX_PITCH;
 	}
 
-	vec3 dir;
-	dir[0] = cos(glm_rad(yaw)) * cos(glm_rad(pitch));
-	dir[1] = sin(glm_rad(pitch));
-	dir[2] = sin(glm_rad(yaw)) * cos(glm_rad(pitch));
-	glm_normalize(dir);
-	glm_vec3_copy(dir, cam_front);
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cam_front = glm::normalize(front);
 }
 
 
 void processInput(GLFWwindow *window) {
-	const float cam_speed = 5.0f * delta_time;
-	vec3 tmp;
-
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, 1);
 	}
 
+	float cam_speed = static_cast<float>(5.0 * delta_time);
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		glm_vec3_scale(cam_front, cam_speed, tmp);
-		glm_vec3_add(cam_pos, tmp, cam_pos);
+		cam_pos += cam_speed * cam_front;
 	} else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		glm_vec3_scale(cam_front, cam_speed, tmp);
-		glm_vec3_sub(cam_pos, tmp, cam_pos);
+		cam_pos -= cam_speed * cam_front;
 	} else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		glm_vec3_cross(cam_front, cam_up, tmp);
-		glm_vec3_normalize(tmp);
-		glm_vec3_scale(tmp, cam_speed, tmp);
-		glm_vec3_sub(cam_pos, tmp, cam_pos);
+		cam_pos -= glm::normalize(glm::cross(cam_front, cam_up)) * cam_speed;
 	} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		glm_vec3_cross(cam_front, cam_up, tmp);
-		glm_vec3_normalize(tmp);
-		glm_vec3_scale(tmp, cam_speed, tmp);
-		glm_vec3_add(cam_pos, tmp, cam_pos);
+		cam_pos += glm::normalize(glm::cross(cam_front, cam_up)) * cam_speed;
 	}
 }
 
 
-int init_opengl() {
+GLFWwindow *create_window(const unsigned int width, const unsigned int heigt, const char *title) {
+	GLFWwindow *window = glfwCreateWindow(width, heigt, title, nullptr, nullptr);
+	if (!window) {
+		std::cout << "Failed to create GLFW window\n";
+		glfwTerminate();
+	} else {
+		glfwMakeContextCurrent(window);
+		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+		glfwSetCursorPosCallback(window, mouse_callback);
+		glfwSetScrollCallback(window, mouse_scroll_callback);
+	}
+
+	return window;
+}
+
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
+
+
+bool init_opengl() {
 	if (!glfwInit()) {
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		return 0;
+		std::cout << "Failed to initialize GLFW\n";
+		return GL_FALSE;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	return 1;
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	return GL_TRUE;
+}
+
+
+void enable_glfw_params() {
+	glEnable(GL_DEPTH_TEST);
 }
