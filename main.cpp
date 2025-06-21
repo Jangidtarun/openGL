@@ -7,30 +7,20 @@
 
 #include <iostream>
 
+#include "camera.h"
 #include "texture.h"
 #include "shader.h"
 #include "error_codes.h"
 
-#define INFO_LOG_SIZE 512
-
 // settings
-const unsigned int WINDOW_WIDTH = 800;
-const unsigned int WINDOW_HEIGHT = 600;
-const float MAX_PITCH = 89.0f;
-const float MAX_ZOOM = 45.0f;
-const float MIN_ZOOM = 1.0f;
+const unsigned int WINDOW_WIDTH		= 800;
+const unsigned int WINDOW_HEIGHT	= 600;
 
 // camera
-glm::vec3 cam_pos 	= glm::vec3(0.0f, 0.0f,  3.0f);
-glm::vec3 cam_front = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cam_up 	= glm::vec3(0.0f, 1.0f,  0.0f);
-
-bool first_mouse = true;
-float yaw = -90.0f;
-float pitch = 0.0f;
-float mouse_last_x = WINDOW_WIDTH / 2.0f;
-float mouse_last_y = WINDOW_HEIGHT / 2.0f;
-float fov = 45.0f;
+CAMERA cam;
+bool first_mouse	= true;
+float mouse_last_x	= WINDOW_WIDTH / 2.0f;
+float mouse_last_y	= WINDOW_HEIGHT / 2.0f;
 
 // timing
 float delta_time = 0.0f;
@@ -67,6 +57,8 @@ int main() {
 		std::cout << "Failed to initialize GLAD\n";
 		return GLAD_INIT_FAILED;
 	}
+
+	cam = create_camera();
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	enable_glfw_params();
@@ -156,7 +148,7 @@ int main() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	// textures
+	// texture 1
 	unsigned int texture1;
 	glGenTextures(1, &texture1);
 
@@ -170,6 +162,7 @@ int main() {
 
 	make_texture(texture1_path, JPG_TEX);
 
+	// texture 2
 	unsigned int texture2;
 	glGenTextures(1, &texture2);
 
@@ -183,6 +176,7 @@ int main() {
 
 	make_texture(texture2_path, JPG_TEX);
 
+	// tell OPENGL for each sample to which texutre unit it belongs to (only has to be done once)
 	glUseProgram(shaderProgram);
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
@@ -196,7 +190,7 @@ int main() {
 	unsigned int projection_uniform_location = glGetUniformLocation(shaderProgram, "projection");
 
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.1f, 0.7f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		processInput(window);
 
@@ -204,10 +198,11 @@ int main() {
 		delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
-		glm::mat4 projection = glm::perspective(glm::radians(fov), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(cam.zoom), 
+				(float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 		glUniformMatrix4fv(projection_uniform_location, 1, GL_FALSE, glm::value_ptr(projection));
 
-		glm::mat4 view = glm::lookAt(cam_pos, cam_pos + cam_front, cam_up);
+		glm::mat4 view = get_view_matrix(&cam);
 		glUniformMatrix4fv(view_uniform_location, 1, GL_FALSE, glm::value_ptr(view));
 
 		for (int i = 0; i < 10; i++) {
@@ -234,44 +229,27 @@ int main() {
 
 
 void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-	fov -= (float) yoffset;
-	if (fov > MAX_ZOOM) {
-		fov = MAX_ZOOM;
-	} else if (fov < MIN_ZOOM) {
-		fov = MIN_ZOOM;
-	}
+	get_cam_mouse_scroll(&cam, static_cast<float>(yoffset));
 }
 
 
-void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+void mouse_callback(GLFWwindow *window, double xpos_in, double ypos_in) {
+	float xpos = static_cast<float>(xpos_in);
+	float ypos = static_cast<float>(ypos_in);
+	
 	if (first_mouse) {
 		mouse_last_x = xpos;
 		mouse_last_y = ypos;
 		first_mouse = false;
 	}
 
-	float xoffset = (float) xpos - mouse_last_x;
-	float yoffset = mouse_last_y - (float) ypos;
-	mouse_last_x = (float) xpos;
-	mouse_last_y = (float) ypos;
+	float xoffset = xpos - mouse_last_x;
+	float yoffset = mouse_last_y - ypos;
 
-	const float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
+	mouse_last_x = xpos;
+	mouse_last_y = ypos;
 
-	yaw += xoffset;
-	pitch += yoffset;
-	if (pitch > MAX_PITCH) {
-		pitch = MAX_PITCH;
-	} else if (pitch < -MAX_PITCH) {
-		pitch = -MAX_PITCH;
-	}
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cam_front = glm::normalize(front);
+	get_cam_mouse_input(&cam, xoffset, yoffset);
 }
 
 
@@ -280,16 +258,14 @@ void processInput(GLFWwindow *window) {
 		glfwSetWindowShouldClose(window, 1);
 	}
 
-	float cam_speed = static_cast<float>(5.0 * delta_time);
-
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		cam_pos += cam_speed * cam_front;
+		get_cam_keyboard_input(&cam, FORWARD, delta_time);
 	} else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		cam_pos -= cam_speed * cam_front;
+		get_cam_keyboard_input(&cam, BACKWARD, delta_time);
 	} else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		cam_pos -= glm::normalize(glm::cross(cam_front, cam_up)) * cam_speed;
+		get_cam_keyboard_input(&cam, LEFT, delta_time);
 	} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		cam_pos += glm::normalize(glm::cross(cam_front, cam_up)) * cam_speed;
+		get_cam_keyboard_input(&cam, RIGHT, delta_time);
 	}
 }
 
