@@ -1,8 +1,8 @@
 CFLAGS = -Wall
 LIBS = -lglfw -lGL -ldl -Iinclude -lm
-SRC = main.c
+SRC = main.cpp
 OUT = main
-CC = gcc
+CC = g++
 GLAD = src/glad.c
 
 
