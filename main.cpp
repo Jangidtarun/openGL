@@ -63,11 +63,8 @@ int main() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	enable_glfw_params();
 
-	const char *vertexShaderSource = load_shader(vertexShaderSource_path);
-	const char *fragmentShaderSource = load_shader(fragmentShaderSource_path);
-
-	unsigned int vertexShader = compile_vertex_shader(vertexShaderSource);
-	unsigned int fragmentShader = compile_fragment_shader(fragmentShaderSource);
+	unsigned int vertexShader = compile_vertex_shader(vertexShaderSource_path);
+	unsigned int fragmentShader = compile_fragment_shader(fragmentShaderSource_path);
 	unsigned int shaderProgram = create_shader_program(vertexShader, fragmentShader);
 
 	glDeleteShader(vertexShader);
