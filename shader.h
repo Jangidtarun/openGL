@@ -31,7 +31,8 @@ unsigned int create_shader_program(const unsigned int vert_shader, const unsigne
 }
 
 
-unsigned int compile_fragment_shader(const char *fragment_shader_code) {
+unsigned int compile_fragment_shader(const char *fshader_path) {
+	const char *fragment_shader_code = load_shader(fshader_path);
     unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &fragment_shader_code, NULL);
     glCompileShader(fragment_shader);
@@ -49,7 +50,8 @@ unsigned int compile_fragment_shader(const char *fragment_shader_code) {
 }
 
 
-unsigned int compile_vertex_shader(const char *vertex_shader_code) {
+unsigned int compile_vertex_shader(const char *vshader_path) {
+	const char *vertex_shader_code = load_shader(vshader_path);
     unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_code, NULL);
     glCompileShader(vertex_shader);
