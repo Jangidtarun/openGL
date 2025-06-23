@@ -63,6 +63,10 @@ int main() {
 	}
 
 	cam = create_camera();
+	cam.position	= glm::vec3(1.1f, 1.2f, 3.3f);
+	cam.up			= glm::normalize(glm::vec3(-0.086914f, 0.941746f, -0.3249f));
+	cam.front		= glm::normalize(glm::vec3(-0.167422f, -0.33530f, -0.9271f));
+
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glEnable(GL_DEPTH_TEST);
