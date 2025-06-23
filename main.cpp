@@ -199,7 +199,6 @@ int main() {
 
 		glUniform3fv(glGetUniformLocation(shader_program, "light_color"), 1, glm::value_ptr(glm::vec3(1.0f)));
 		glUniform3fv(glGetUniformLocation(shader_program, "light_pos"), 1, glm::value_ptr(light_pos));
-		glUniform3fv(glGetUniformLocation(shader_program, "view_pos"), 1, glm::value_ptr(cam.position));
 		glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
