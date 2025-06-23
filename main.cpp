@@ -30,7 +30,10 @@ bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-const glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
+const float light_move_radius	= 2.0f;
+float light_move_angle			= 45.0f;
+glm::vec3 light_pos(light_move_radius * cos(glm::radians(light_move_angle)), 1.0, 
+			light_move_radius * sin(glm::radians(light_move_angle)));
 const char *vshader_light_source_path	= "shaders/light_source.vert";
 const char *fshader_light_source_path	= "shaders/light_source.frag";
 
@@ -208,6 +211,9 @@ int main() {
 		glUseProgram(shader_program_light_source);
 
 		model = glm::mat4(1.0f);
+		float freqeuncy = 10.0f;
+		light_pos.x	= light_move_radius * cos(freqeuncy * glm::radians(glfwGetTime()));
+		light_pos.z	= light_move_radius * sin(freqeuncy * glm::radians(glfwGetTime()));
 		model = glm::translate(model, light_pos);
 		model = glm::scale(model, glm::vec3(0.2f));
 
