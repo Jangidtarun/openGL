@@ -26,8 +26,8 @@ void main() {
 	float spe_strength	= 0.5f;
 	float shininess		= 64.0f;
 
-	vec3 light_dir	= normalize(light_pos - pos_in);
-	vec3 view_dir	= normalize(view_pos - pos_in);
+	vec3 light_dir	= normalize(light_pos - frag_pos);
+	vec3 view_dir	= normalize(view_pos - frag_pos);
 	vec3 reflection	= reflect(-light_dir, normal);
 
 	vec3 ambient	= amb_strength * light_color;
