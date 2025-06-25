@@ -13,6 +13,7 @@ uniform vec3 view_pos;
 
 void main() {
     gl_Position = projection * view * model * vec4(pos_in, 1.0f);
+	// normal		= vec3(1.0f);
 	normal		= mat3(transpose(inverse(model))) * normal_in;
 	frag_pos	= vec3(model * vec4(pos_in, 1.0));
 }

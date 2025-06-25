@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "colors.h"
+#include "sphere.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -133,21 +134,49 @@ int main() {
 	unsigned int vbo_light;
 	unsigned int vao_light;
 
+	glGenVertexArrays(1, &vao_light);
+	glBindVertexArray(vao_light);
+
 	glGenBuffers(1, &vbo_light);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_light);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	size_t stride_vertices	= 3 * sizeof(float);
 
-	glGenVertexArrays(1, &vao_light);
-	glBindVertexArray(vao_light);
-
 	// layout (location = 0) position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride_vertices, (void *)0);
 	glEnableVertexAttribArray(0);
 
+	SPHERE s	= create_sphere();
+	generate_indices(&s);
+	unsigned int vao_sphere, ebo_sphere;
+	unsigned int vbo_position, vbo_normal;
+
+	glGenVertexArrays(1, &vao_sphere);
+	glBindVertexArray(vao_sphere);
+
+	glGenBuffers(1, &vbo_position);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
+	glBufferData(GL_ARRAY_BUFFER, s.vertices.size() * sizeof(float), 
+			s.vertices.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &ebo_sphere);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_sphere);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, s.indices.size() * sizeof(unsigned int), 
+			s.indices.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride_vertices, (void *)0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &vbo_normal);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_normal);
+	glBufferData(GL_ARRAY_BUFFER, s.normals.size() * sizeof(float), 
+			s.normals.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride_vertices, (void *)0);
+	glEnableVertexAttribArray(1);
+
 	while (!glfwWindowShouldClose(window)) {
-		// glClearColor(0.0, 0.4, 0.9, 1.0);
 		glClearColor(COL_BACKGROUND);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		process_input(window);
@@ -175,6 +204,9 @@ int main() {
 				1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 
 				1, GL_FALSE, glm::value_ptr(proj));
+
+ 		glBindVertexArray(vao_sphere);
+ 		glDrawElements(GL_TRIANGLES, s.indices.size(), GL_UNSIGNED_INT, 0);
 
 		// light source shader program
 		glUseProgram(shader_program_light_source);

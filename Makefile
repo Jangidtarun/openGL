@@ -4,11 +4,11 @@ SRC 	= main.cpp
 OUT 	= main
 CC 		= g++
 GLAD 	= src/glad.c
-CAMERA	= camera.cpp
-DEPEN	= camera.h texture.h shader.h
+DEPEN	= camera.h texture.h shader.h sphere.h
+DEPEN_SRC	= camera.cpp sphere.cpp
 
 $(OUT): $(SRC) $(DEPEN)
-	$(CC) $(CFLAGS) $(SRC) $(CAMERA) $(GLAD) $(LIBS) -o $(OUT)
+	$(CC) $(CFLAGS) $(SRC) $(DEPEN_SRC) $(GLAD) $(LIBS) -o $(OUT)
 
 clean:
 	rm -f $(OUT)
