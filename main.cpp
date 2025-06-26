@@ -33,7 +33,7 @@ glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
 LIGHT light = create_light(glm::vec3(1.0f, 1.0f, 2.0f), 
-		glm::vec3(0.0f, 1.0f, 1.0f),
+		glm::vec3(1.0f),
 		glm::vec3(0.2f),
 		glm::vec3(0.5f),
 		glm::vec3(1.0f));
@@ -229,6 +229,7 @@ int main() {
 		model = glm::translate(model, light.position);
 		model = glm::scale(model, glm::vec3(0.2f));
 
+		uniset_vec3(shader_program_light_source, "light_color", light.light_color);
 		uniset_mat4(shader_program_light_source, "model", model);
 		uniset_mat4(shader_program_light_source, "view", view);
 		uniset_mat4(shader_program_light_source, "projection", proj);
