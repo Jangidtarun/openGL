@@ -36,7 +36,7 @@ void main() {
 
 	vec3 view_dir	= normalize(view_pos - frag_pos);
 	vec3 reflect_dir	= reflect(-light_dir, norm);
-	float spec	= pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
+	float spec	= pow(max(dot(view_dir, reflect_dir), 0.0), 128.0f * material.shininess);
 	vec3 specular	= light.specular * (spec * material.specular);
 
 	vec3 result	= ambient + diffuse + specular;
