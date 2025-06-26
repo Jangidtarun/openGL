@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
+#include "materials.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -194,28 +195,23 @@ int main() {
 		glm::mat4 view	= get_view_matrix(&cam);
 		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom), ASPECT_RATIO, 0.1f, 100.0f);
 
-		glUniform3fv(glGetUniformLocation(shader_program, "light_color"), 
-				1, glm::value_ptr(glm::vec3(1.0f)));
-		glUniform3fv(glGetUniformLocation(shader_program, "light_pos"), 
-				1, glm::value_ptr(light_pos));
-		glUniform3fv(glGetUniformLocation(shader_program, "view_pos"), 
-				1, glm::value_ptr(cam.position));
-
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 
-				1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 
-				1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 
-				1, GL_FALSE, glm::value_ptr(proj));
+		uniset_vec3(shader_program, "view_pos", cam.position);
+		uniset_mat4(shader_program, "model", model);
+		uniset_mat4(shader_program, "view", view);
+		uniset_mat4(shader_program, "projection", proj);
 
 		// set the material
-		glUniform3fv(glGetUniformLocation(shader_program, "material.ambient"),
-				1, glm::value_ptr(glm::vec3(0.05375,	0.05, 	0.06625)));
-		glUniform3fv(glGetUniformLocation(shader_program, "material.diffuse"),
-				1, glm::value_ptr(glm::vec3(0.18275, 	0.17, 	0.22525)));
-		glUniform3fv(glGetUniformLocation(shader_program, "material.diffuse"),
-				1, glm::value_ptr(glm::vec3(0.332741, 	0.328634, 	0.346435)));
-		glUniform1f(glGetUniformLocation(shader_program, "material.shininess"), 0.3f);
+		uniset_vec3(shader_program, "material.ambient", obsidian.ambient);
+		uniset_vec3(shader_program, "material.diffuse", obsidian.diffuse);
+		uniset_vec3(shader_program, "material.specular", obsidian.specular);
+		uniset_float(shader_program, "material.shininess", obsidian.shininess);
+
+		// set the light
+		uniset_vec3(shader_program, "light.position", light_pos);
+		uniset_vec3(shader_program, "light.ambient", glm::vec3(0.2f));
+		uniset_vec3(shader_program, "light.diffuse", glm::vec3(1.0f));
+		uniset_vec3(shader_program, "light.specular", glm::vec3(1.0f));
+		
 
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
