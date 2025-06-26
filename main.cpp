@@ -34,7 +34,7 @@ glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 // light source
 LIGHT light = create_light(glm::vec3(1.0f, 1.0f, 2.0f), 
 		glm::vec3(1.0f),
-		glm::vec3(0.2f),
+		glm::vec3(1.0f),
 		glm::vec3(0.5f),
 		glm::vec3(1.0f));
 
