@@ -194,12 +194,28 @@ int main() {
 		glm::mat4 view	= get_view_matrix(&cam);
 		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom), ASPECT_RATIO, 0.1f, 100.0f);
 
-		glUniform3fv(glGetUniformLocation(shader_program, "light_color"), 1, glm::value_ptr(glm::vec3(1.0f)));
-		glUniform3fv(glGetUniformLocation(shader_program, "light_pos"), 1, glm::value_ptr(light_pos));
-		glUniform3fv(glGetUniformLocation(shader_program, "view_pos"), 1, glm::value_ptr(cam.position));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+		glUniform3fv(glGetUniformLocation(shader_program, "light_color"), 
+				1, glm::value_ptr(glm::vec3(1.0f)));
+		glUniform3fv(glGetUniformLocation(shader_program, "light_pos"), 
+				1, glm::value_ptr(light_pos));
+		glUniform3fv(glGetUniformLocation(shader_program, "view_pos"), 
+				1, glm::value_ptr(cam.position));
+
+		glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 
+				1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 
+				1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 
+				1, GL_FALSE, glm::value_ptr(proj));
+
+		// set the material
+		glUniform3fv(glGetUniformLocation(shader_program, "material.ambient"),
+				1, glm::value_ptr(glm::vec3(0.05375,	0.05, 	0.06625)));
+		glUniform3fv(glGetUniformLocation(shader_program, "material.diffuse"),
+				1, glm::value_ptr(glm::vec3(0.18275, 	0.17, 	0.22525)));
+		glUniform3fv(glGetUniformLocation(shader_program, "material.diffuse"),
+				1, glm::value_ptr(glm::vec3(0.332741, 	0.328634, 	0.346435)));
+		glUniform1f(glGetUniformLocation(shader_program, "material.shininess"), 0.3f);
 
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -211,9 +227,12 @@ int main() {
 		model = glm::translate(model, light_pos);
 		model = glm::scale(model, glm::vec3(0.2f));
 
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "model"), 
+				1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "view"), 
+				1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "projection"), 
+				1, GL_FALSE, glm::value_ptr(proj));
 
 		glBindVertexArray(light_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
