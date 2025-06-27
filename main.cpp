@@ -24,7 +24,9 @@ const char *vshader_path	= "shaders/shader.vert";
 const char *fshader_path	= "shaders/shader.frag";
 
 // texture file paths
-const char *texture_path	= "textures/container.jpg";
+const char *diffuse_map_texture		= "textures/container2.png";
+const char *specular_map_texture	= "textures/container2_specular.png";
+const char *emission_map_texture	= "textures/matrix.jpg";
 
 // camera
 CAMERA cam;
@@ -93,11 +95,11 @@ int main() {
 	unsigned int fshader_light_source	= compile_fragment_shader(fshader_light_source_path);
 	unsigned int shader_program_light_source = create_shader_program(vshader_light_source, fshader_light_source);
 
-	unsigned int texture;
-	glGenTextures(1, &texture);
+	unsigned int diffuse_map;
+	glGenTextures(1, &diffuse_map);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, diffuse_map);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -105,7 +107,35 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
 
-	make_texture(texture_path, JPG_TEX);
+	make_texture(diffuse_map_texture, PNG_TEX);
+
+	unsigned int specular_map;
+	glGenTextures(1, &specular_map);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, specular_map);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
+
+	make_texture(specular_map_texture, PNG_TEX);
+
+	unsigned int emission_map;
+	glGenTextures(1, &emission_map);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, emission_map);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
+
+	make_texture(emission_map_texture, JPG_TEX);
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
@@ -184,9 +214,8 @@ int main() {
 	glEnableVertexAttribArray(0);
 
 
-
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.0, 0.4, 0.9, 1.0);
+		glClearColor(0.1, 0.1, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		process_input(window);
 
@@ -207,9 +236,9 @@ int main() {
 		uniset_mat4(shader_program, "projection", proj);
 
 		// set the material
-		uniset_vec3(shader_program, "material.ambient",		gold.ambient);
-		uniset_vec3(shader_program, "material.diffuse",		gold.diffuse);
-		uniset_vec3(shader_program, "material.specular",	gold.specular);
+		uniset_int(shader_program, "material.diffuse",	0);
+		uniset_int(shader_program, "material.specular",	1);
+		uniset_int(shader_program, "material.emission", 2);
 		uniset_float(shader_program, "material.shininess",	gold.shininess);
 
 		// set the light
