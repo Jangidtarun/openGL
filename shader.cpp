@@ -102,3 +102,8 @@ void uniset_vec3(unsigned int shader_program, const char *name, const glm::vec3 
 void uniset_mat4(unsigned int shader_program, const char *name, const glm::mat4 mat) {
 	glUniformMatrix4fv(glGetUniformLocation(shader_program, name), 1, GL_FALSE, glm::value_ptr(mat));
 }
+
+
+void uniset_int(unsigned int shader_program, const char *name, const int val) {
+	glUniform1i(glGetUniformLocation(shader_program, name), val);
+}

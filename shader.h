@@ -20,5 +20,6 @@ unsigned int create_shader_program(const unsigned int vert_shader, const unsigne
 void uniset_float(unsigned int shader_program, const char *name, const float val);
 void uniset_vec3(unsigned int shader_program, const char *name, const glm::vec3 vec);
 void uniset_mat4(unsigned int shader_program, const char *name, const glm::mat4 mat);
+void uniset_int(unsigned int shader_program, const char *name, const int val);
 
 #endif
