@@ -1,6 +1,4 @@
 #include "camera.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 
 static float clamp(float value, float min_val, float max_val) {
@@ -10,7 +8,7 @@ static float clamp(float value, float min_val, float max_val) {
 }
 
 
-void update_cam_vecs(CAMERA *cam) {
+void update_cam_vecs(Camera *cam) {
 	glm::vec3 front;
 
 	front.x	= cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
@@ -23,17 +21,17 @@ void update_cam_vecs(CAMERA *cam) {
 }
 
 
-CAMERA create_camera(
+Camera create_camera(
     glm::vec3 position,
-    glm::vec3 up, 
+    glm::vec3 up,
     glm::vec3 front,
     float move_speed,
-    float mouse_sensitivity,	
-    float zoom,	
-    float yaw,			
+    float mouse_sensitivity,
+    float zoom,
+    float yaw,
     float pitch
 ) {
-	CAMERA cam;
+	Camera cam;
 	cam.position	= position;
 	cam.front		= front;
 	cam.worldup		= up;
@@ -47,12 +45,12 @@ CAMERA create_camera(
 }
 
 
-glm::mat4 get_view_matrix(CAMERA *cam) {
+glm::mat4 get_view_matrix(Camera *cam) {
 	return glm::lookAt(cam->position, cam->position + cam->front, cam->up);
 }
 
 
-void get_cam_keyboard_input(CAMERA *cam, CAMERA_MOVEMENTS direction, float delta_time) {
+void get_cam_keyboard_input(Camera *cam, CAMERA_MOVEMENTS direction, float delta_time) {
     float velocity = cam->move_speed * delta_time;
     if (direction == FORWARD) {
         cam->position += cam->front * velocity;
@@ -69,7 +67,7 @@ void get_cam_keyboard_input(CAMERA *cam, CAMERA_MOVEMENTS direction, float delta
 }
 
 
-void get_cam_mouse_input(CAMERA *cam, float xoffset, float yoffset, bool constrain_pitch) {
+void get_cam_mouse_input(Camera *cam, float xoffset, float yoffset, bool constrain_pitch) {
     xoffset *= cam->mouse_sensitivity;
     yoffset *= cam->mouse_sensitivity;
 
@@ -84,7 +82,7 @@ void get_cam_mouse_input(CAMERA *cam, float xoffset, float yoffset, bool constra
 }
 
 
-void get_cam_mouse_scroll(CAMERA *cam, float yoffset) {
+void get_cam_mouse_scroll(Camera *cam, float yoffset) {
     cam->zoom -= yoffset;
     cam->zoom = clamp(cam->zoom, ZOOM_MIN, ZOOM_MAX);
 }

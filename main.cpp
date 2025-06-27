@@ -7,11 +7,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "shader.h"
-#include "camera.h"
-#include "texture.h"
-#include "materials.h"
-#include "light.h"
+#include "shader/shader.h"
+#include "camera/camera.h"
+#include "texture/texture.h"
+#include "materials/materials.h"
+#include "light/light.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -20,28 +20,28 @@ const float	ASPECT_RATIO			= (float) WINDOW_WIDTH / WINDOW_HEIGHT;
 const char *WINDOW_TITLE			= "Lighting";
 
 // shader file paths
-const char *vshader_path	= "shaders/shader.vert";
-const char *fshader_path	= "shaders/shader.frag";
+const char *vshader_path	= "res/shaders/shader.vert";
+const char *fshader_path	= "res/shaders/shader.frag";
 
 // texture file paths
-const char *diffuse_map_texture		= "textures/container2.png";
-const char *specular_map_texture	= "textures/container2_specular.png";
-const char *emission_map_texture	= "textures/matrix.jpg";
+const char *diffuse_map_texture		= "res/textures/container2.png";
+const char *specular_map_texture	= "res/textures/container2_specular.png";
+const char *emission_map_texture	= "res/textures/matrix.jpg";
 
 // camera
-CAMERA cam;
+Camera cam;
 bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-LIGHT light = create_light(glm::vec3(1.0f, 1.0f, 2.0f), 
+Light light = create_light(glm::vec3(1.0f, 1.0f, 2.0f), 
 		glm::vec3(1.0f),
 		glm::vec3(1.0f),
 		glm::vec3(0.5f),
 		glm::vec3(1.0f));
 
-const char *vshader_light_source_path	= "shaders/light_source.vert";
-const char *fshader_light_source_path	= "shaders/light_source.frag";
+const char *vshader_light_source_path	= "res/shaders/light_source.vert";
+const char *fshader_light_source_path	= "res/shaders/light_source.frag";
 
 // animation
 float delta_time = 0.0f;

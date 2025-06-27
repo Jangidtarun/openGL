@@ -37,11 +37,11 @@ typedef struct {
 	float move_speed;
 	float mouse_sensitivity;
 	float zoom;
-} CAMERA;
+} Camera;
 
 
-void update_cam_vecs(CAMERA *cam);
-CAMERA create_camera(
+void update_cam_vecs(Camera *cam);
+Camera create_camera(
 		glm::vec3 position	= glm::vec3(0.0f, 0.0f,  3.0f),
 		glm::vec3 up		= glm::vec3(0.0f, 1.0f,  0.0f),
 		glm::vec3 front		= glm::vec3(0.0f, 0.0f, -1.0f),
@@ -52,14 +52,14 @@ CAMERA create_camera(
 		float pitch			= PITCH
 		);	
 
-glm::mat4 get_view_matrix(CAMERA *cam);
-void get_cam_keyboard_input(CAMERA *cam, CAMERA_MOVEMENTS direction, float delta_time);
-void get_cam_mouse_input(CAMERA *cam, 
+glm::mat4 get_view_matrix(Camera *cam);
+void get_cam_keyboard_input(Camera *cam, CAMERA_MOVEMENTS direction, float delta_time);
+void get_cam_mouse_input(Camera *cam, 
 		float xoffset, 
 		float yoffset, 
 		bool constrain_pitch = true
 		); 
 
-void get_cam_mouse_scroll(CAMERA *cam, float yoffset);
+void get_cam_mouse_scroll(Camera *cam, float yoffset);
 
 #endif

@@ -4,8 +4,21 @@ SRC 	= main.cpp
 OUT 	= main
 CC 		= g++
 GLAD 	= src/glad.c
-DEPEN_SRC	= camera.cpp shader.cpp light.cpp
-DEPEN	= camera.h texture.h shader.h materials.h light.h
+
+CAMERA_SRC	= camera/camera.cpp
+CAMERA_HEAD	= camera/camera.h
+
+LIGHT_SRC	= light/light.cpp
+LIGHT_HEAD	= light/light.h
+
+SHADER_SRC	= shader/shader.cpp
+SHADER_HEAD	= shader/shader.h
+
+TEXTURE_HEAD	= texture/texture.h
+MATERIALS_HEAD	= materials/materials.h
+
+DEPEN	= $(CAMERA_HEAD) $(LIGHT_HEAD) $(SHADER_HEAD) $(MATERIALS_HEAD) $(TEXTURE_HEAD)
+DEPEN_SRC	= $(CAMERA_SRC) $(LIGHT_SRC) $(SHADER_SRC)
 
 $(OUT): $(SRC) $(DEPEN)
 	$(CC) $(CFLAGS) $(SRC) $(DEPEN_SRC) $(GLAD) $(LIBS) -o $(OUT)

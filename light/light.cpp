@@ -1,9 +1,12 @@
 #include "light.h"
 
-LIGHT
-create_light(glm::vec3 position, glm::vec3 light_color, glm::vec3 ambient_intensity, 
-		glm::vec3 diffuse_intensity, glm::vec3 specular) {
-	LIGHT light;
+Light
+create_light(glm::vec3 position, 
+		glm::vec3 light_color, 
+		glm::vec3 ambient_intensity, 
+		glm::vec3 diffuse_intensity, 
+		glm::vec3 specular) {
+	Light light;
 
 	light.position			= position;
 	light.light_color		= light_color;

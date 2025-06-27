@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "../src/stb_image.h"
 
 const int PNG_TEX = 1;
 const int JPG_TEX = 2;
