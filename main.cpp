@@ -10,6 +10,8 @@
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
+#include "materials.h"
+#include "light.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -22,7 +24,9 @@ const char *vshader_path	= "shaders/shader.vert";
 const char *fshader_path	= "shaders/shader.frag";
 
 // texture file paths
-const char *texture_path	= "textures/container.jpg";
+const char *diffuse_map_texture		= "textures/container2.png";
+const char *specular_map_texture	= "textures/container2_specular.png";
+const char *emission_map_texture	= "textures/matrix.jpg";
 
 // camera
 CAMERA cam;
@@ -30,7 +34,12 @@ bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-const glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
+LIGHT light = create_light(glm::vec3(1.0f, 1.0f, 2.0f), 
+		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+		glm::vec3(0.5f),
+		glm::vec3(1.0f));
+
 const char *vshader_light_source_path	= "shaders/light_source.vert";
 const char *fshader_light_source_path	= "shaders/light_source.frag";
 
@@ -86,11 +95,11 @@ int main() {
 	unsigned int fshader_light_source	= compile_fragment_shader(fshader_light_source_path);
 	unsigned int shader_program_light_source = create_shader_program(vshader_light_source, fshader_light_source);
 
-	unsigned int texture;
-	glGenTextures(1, &texture);
+	unsigned int diffuse_map;
+	glGenTextures(1, &diffuse_map);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, diffuse_map);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -98,7 +107,35 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
 
-	make_texture(texture_path, JPG_TEX);
+	make_texture(diffuse_map_texture, PNG_TEX);
+
+	unsigned int specular_map;
+	glGenTextures(1, &specular_map);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, specular_map);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
+
+	make_texture(specular_map_texture, PNG_TEX);
+
+	unsigned int emission_map;
+	glGenTextures(1, &emission_map);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, emission_map);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
+
+	make_texture(emission_map_texture, JPG_TEX);
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
@@ -177,9 +214,8 @@ int main() {
 	glEnableVertexAttribArray(0);
 
 
-
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.0, 0.4, 0.9, 1.0);
+		glClearColor(0.1, 0.1, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		process_input(window);
 
@@ -194,12 +230,23 @@ int main() {
 		glm::mat4 view	= get_view_matrix(&cam);
 		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom), ASPECT_RATIO, 0.1f, 100.0f);
 
-		glUniform3fv(glGetUniformLocation(shader_program, "light_color"), 1, glm::value_ptr(glm::vec3(1.0f)));
-		glUniform3fv(glGetUniformLocation(shader_program, "light_pos"), 1, glm::value_ptr(light_pos));
-		glUniform3fv(glGetUniformLocation(shader_program, "view_pos"), 1, glm::value_ptr(cam.position));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+		uniset_vec3(shader_program, "view_pos", cam.position);
+		uniset_mat4(shader_program, "model", model);
+		uniset_mat4(shader_program, "view", view);
+		uniset_mat4(shader_program, "projection", proj);
+
+		// set the material
+		uniset_int(shader_program, "material.diffuse",	0);
+		uniset_int(shader_program, "material.specular",	1);
+		uniset_int(shader_program, "material.emission", 2);
+		uniset_float(shader_program, "material.shininess",	gold.shininess);
+
+		// set the light
+		uniset_vec3(shader_program, "light.position",	light.position);
+		uniset_vec3(shader_program, "light.ambient",	light.ambient);
+		uniset_vec3(shader_program, "light.diffuse",	light.diffuse);
+		uniset_vec3(shader_program, "light.specular",	light.specular);
+		
 
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -208,12 +255,13 @@ int main() {
 		glUseProgram(shader_program_light_source);
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, light_pos);
+		model = glm::translate(model, light.position);
 		model = glm::scale(model, glm::vec3(0.2f));
 
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_light_source, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+		uniset_vec3(shader_program_light_source, "light_color", light.light_color);
+		uniset_mat4(shader_program_light_source, "model", model);
+		uniset_mat4(shader_program_light_source, "view", view);
+		uniset_mat4(shader_program_light_source, "projection", proj);
 
 		glBindVertexArray(light_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
