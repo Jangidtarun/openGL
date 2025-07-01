@@ -34,7 +34,7 @@ bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-Light light = create_light(glm::vec3(1.0f, 1.0f, 2.0f), 
+DirectionalLight light = create_directional_light(glm::vec3(1.0f, 1.0f, 1.0f),
 		glm::vec3(1.0f),
 		glm::vec3(1.0f),
 		glm::vec3(0.5f),
@@ -67,7 +67,7 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
-	
+
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to init GLAD\n";
 		glfwDestroyWindow(window);
@@ -76,9 +76,9 @@ int main() {
 	}
 
 	cam = create_camera();
-	cam.position	= glm::vec3(1.1f, 1.2f, 3.3f);
-	cam.up			= glm::normalize(glm::vec3(-0.086914f, 0.941746f, -0.3249f));
-	cam.front		= glm::normalize(glm::vec3(-0.167422f, -0.33530f, -0.9271f));
+	// cam.position	= glm::vec3(1.1f, 1.2f, 3.3f);
+	// cam.up			= glm::normalize(glm::vec3(-0.086914f, 0.941746f, -0.3249f));
+	// cam.front		= glm::normalize(glm::vec3(-0.167422f, -0.33530f, -0.9271f));
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -181,6 +181,19 @@ int main() {
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f
 	};
 
+	glm::vec3 cubePositions[] = {
+		glm::vec3( 4.0f,  -2.3f,   -1.4f),
+		glm::vec3( 2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f,  -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3( 2.4f, -0.4f,  -3.5f),
+		glm::vec3(-1.7f,  3.0f,  -7.5f),
+		glm::vec3( 1.3f, -2.0f,  -2.5f),
+		glm::vec3( 1.5f,  2.0f,  -2.5f),
+		glm::vec3( 1.5f,  0.2f,  -1.5f),
+		glm::vec3(-1.3f,  1.0f,  -1.5f)
+	};
+
 	unsigned int vao;
 	unsigned int vbo;
 	unsigned int light_vao;
@@ -242,23 +255,28 @@ int main() {
 		uniset_float(shader_program, "material.shininess",	gold.shininess);
 
 		// set the light
-		uniset_vec3(shader_program, "light.position",	light.position);
+		uniset_vec3(shader_program, "light.direction",	light.direction);
 		uniset_vec3(shader_program, "light.ambient",	light.ambient);
 		uniset_vec3(shader_program, "light.diffuse",	light.diffuse);
 		uniset_vec3(shader_program, "light.specular",	light.specular);
-		
 
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (int i = 0; i < 10; i++) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = M_PI_4 * i;
+			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.5f, 0.3f));
+			uniset_mat4(shader_program, "model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// light source shader program
 		glUseProgram(shader_program_light_source);
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, light.position);
 		model = glm::scale(model, glm::vec3(0.2f));
 
-		uniset_vec3(shader_program_light_source, "light_color", light.light_color);
+		uniset_vec3(shader_program_light_source, "light_color", light.color);
 		uniset_mat4(shader_program_light_source, "model", model);
 		uniset_mat4(shader_program_light_source, "view", view);
 		uniset_mat4(shader_program_light_source, "projection", proj);
