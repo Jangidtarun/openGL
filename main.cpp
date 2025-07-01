@@ -34,8 +34,8 @@ bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-DirectionalLight light = create_directional_light(glm::vec3(1.0f, 1.0f, 1.0f),
-		glm::vec3(1.0f),
+PointLight light = create_point_light(glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.4f, 0.1f, 1.2f),
 		glm::vec3(1.0f),
 		glm::vec3(0.5f),
 		glm::vec3(1.0f));
@@ -255,10 +255,15 @@ int main() {
 		uniset_float(shader_program, "material.shininess",	gold.shininess);
 
 		// set the light
-		uniset_vec3(shader_program, "light.direction",	light.direction);
+		uniset_vec3(shader_program, "light.position",	light.position);
 		uniset_vec3(shader_program, "light.ambient",	light.ambient);
 		uniset_vec3(shader_program, "light.diffuse",	light.diffuse);
 		uniset_vec3(shader_program, "light.specular",	light.specular);
+		uniset_float(shader_program, "light.kc", light.kc);
+		uniset_float(shader_program, "light.kl", light.kl);
+		uniset_float(shader_program, "light.kq", light.kq);
+
+		uniset_float(shader_program, "time", glfwGetTime());
 
 		glBindVertexArray(vao);
 		for (int i = 0; i < 10; i++) {
@@ -274,6 +279,7 @@ int main() {
 		glUseProgram(shader_program_light_source);
 
 		model = glm::mat4(1.0f);
+		model = glm::translate(model, light.position);
 		model = glm::scale(model, glm::vec3(0.2f));
 
 		uniset_vec3(shader_program_light_source, "light_color", light.color);
