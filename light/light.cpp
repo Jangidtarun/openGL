@@ -1,5 +1,6 @@
 #include "light.h"
 
+
 PointLight
 create_point_light(glm::vec3 position,
 	glm::vec3 color,
@@ -79,4 +80,42 @@ create_directional_light(glm::vec3 direction,
 	light.diffuse	= light.color	* light.diffuse_intensity;
 
 	return light;
+}
+
+void set_spot_light_uniforms(unsigned int shader_program,
+	const char *spotlight_uniform_name,
+	SpotLight &light) {
+	uniset_vec3(shader_program, stradd(spotlight_uniform_name, ".position"),	light.position);
+	uniset_vec3(shader_program, stradd(spotlight_uniform_name, ".direction"),	light.direction);
+	uniset_float(shader_program, stradd(spotlight_uniform_name, ".cutoff"),
+	glm::cos(glm::radians(light.cutoff_angle)));
+	uniset_float(shader_program, stradd(spotlight_uniform_name, ".outer_cutoff"),
+	glm::cos(glm::radians(light.outer_cutoff_angle)));
+	uniset_vec3(shader_program, stradd(spotlight_uniform_name, ".ambient"),	light.ambient);
+	uniset_vec3(shader_program, stradd(spotlight_uniform_name, ".diffuse"),	light.diffuse);
+	uniset_vec3(shader_program, stradd(spotlight_uniform_name, ".specular"),	light.specular);
+	uniset_float(shader_program, stradd(spotlight_uniform_name, ".kc"), light.kc);
+	uniset_float(shader_program, stradd(spotlight_uniform_name, ".kl"), light.kl);
+	uniset_float(shader_program, stradd(spotlight_uniform_name, ".kq"), light.kq);
+}
+
+void set_point_light_uniforms(unsigned int shader_program,
+	const char *pointlight_uniform_name,
+	PointLight &light) {
+	uniset_vec3(shader_program, stradd(pointlight_uniform_name, ".position"),	light.position);
+	uniset_vec3(shader_program, stradd(pointlight_uniform_name, ".ambient"),	light.ambient);
+	uniset_vec3(shader_program, stradd(pointlight_uniform_name, ".diffuse"),	light.diffuse);
+	uniset_vec3(shader_program, stradd(pointlight_uniform_name, ".specular"),	light.specular);
+	uniset_float(shader_program, stradd(pointlight_uniform_name, ".kc"), light.kc);
+	uniset_float(shader_program, stradd(pointlight_uniform_name, ".kl"), light.kl);
+	uniset_float(shader_program, stradd(pointlight_uniform_name, ".kq"), light.kq);
+}
+
+void set_directional_light_uniforms(unsigned int shader_program,
+	const char *dirlight_uniform_name,
+	DirectionalLight &light) {
+	uniset_vec3(shader_program, stradd(dirlight_uniform_name, ".direction"),	light.direction);
+	uniset_vec3(shader_program, stradd(dirlight_uniform_name, ".ambient"),	light.ambient);
+	uniset_vec3(shader_program, stradd(dirlight_uniform_name, ".diffuse"),	light.diffuse);
+	uniset_vec3(shader_program, stradd(dirlight_uniform_name, ".specular"),	light.specular);
 }
