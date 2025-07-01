@@ -34,11 +34,14 @@ bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-DirectionalLight light = create_directional_light(glm::vec3(1.0f, 1.0f, 1.0f),
-		glm::vec3(1.0f),
-		glm::vec3(1.0f),
-		glm::vec3(0.5f),
-		glm::vec3(1.0f));
+SpotLight light = create_spot_light(cam.position,
+	cam.front,
+	12.0f,
+	14.0f,
+	glm::vec3(1.0f),
+	glm::vec3(0.1f),
+	glm::vec3(1.0f),
+	glm::vec3(1.0f));
 
 const char *vshader_light_source_path	= "res/shaders/light_source.vert";
 const char *fshader_light_source_path	= "res/shaders/light_source.frag";
@@ -255,10 +258,20 @@ int main() {
 		uniset_float(shader_program, "material.shininess",	gold.shininess);
 
 		// set the light
+		light.position = cam.position;
+		light.direction = cam.front;
+		uniset_vec3(shader_program, "light.position",	light.position);
 		uniset_vec3(shader_program, "light.direction",	light.direction);
+		uniset_float(shader_program, "light.cutoff", glm::cos(glm::radians(light.cutoff_angle)));
+		uniset_float(shader_program, "light.outer_cutoff", glm::cos(glm::radians(light.outer_cutoff_angle)));
 		uniset_vec3(shader_program, "light.ambient",	light.ambient);
 		uniset_vec3(shader_program, "light.diffuse",	light.diffuse);
 		uniset_vec3(shader_program, "light.specular",	light.specular);
+		uniset_float(shader_program, "light.kc", light.kc);
+		uniset_float(shader_program, "light.kl", light.kl);
+		uniset_float(shader_program, "light.kq", light.kq);
+
+		uniset_float(shader_program, "time", glfwGetTime());
 
 		glBindVertexArray(vao);
 		for (int i = 0; i < 10; i++) {
@@ -271,18 +284,19 @@ int main() {
 		}
 
 		// light source shader program
-		glUseProgram(shader_program_light_source);
+		// glUseProgram(shader_program_light_source);
 
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.2f));
+		// model = glm::mat4(1.0f);
+		// model = glm::translate(model, light.position);
+		// model = glm::scale(model, glm::vec3(0.2f));
 
-		uniset_vec3(shader_program_light_source, "light_color", light.color);
-		uniset_mat4(shader_program_light_source, "model", model);
-		uniset_mat4(shader_program_light_source, "view", view);
-		uniset_mat4(shader_program_light_source, "projection", proj);
+		// uniset_vec3(shader_program_light_source, "light_color", light.color);
+		// uniset_mat4(shader_program_light_source, "model", model);
+		// uniset_mat4(shader_program_light_source, "view", view);
+		// uniset_mat4(shader_program_light_source, "projection", proj);
 
-		glBindVertexArray(light_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		// glBindVertexArray(light_vao);
+		// glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
