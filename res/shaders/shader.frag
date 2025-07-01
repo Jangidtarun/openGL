@@ -16,6 +16,18 @@ struct PointLight {
 	float kc, kl, kq;
 };
 
+struct SpotLight {
+	vec3	position;
+	vec3	direction;
+	float	cutoff;
+	float	outer_cutoff;
+	vec3	ambient;
+	vec3	diffuse;
+	vec3	specular;
+
+	float kc, kl, kq;
+};
+
 struct DirectionalLight {
 	vec3	direction;
 	vec3	ambient;
@@ -31,13 +43,14 @@ in vec3 frag_pos;
 
 uniform vec3 view_pos;
 
-uniform PointLight light;
+uniform SpotLight light;
 uniform Material material;
 uniform float time;
 
 void main() {
 	float distance 	= length(light.position - frag_pos);
 	float attenuation = 1.0 / (light.kc + light.kl * distance + light.kq * distance * distance);
+	float epsilon	= light.cutoff - light.outer_cutoff;
 
 	vec3 ambient	= light.ambient * vec3(texture(material.diffuse, tex_coord));
 
@@ -53,9 +66,12 @@ void main() {
 
 	vec3 emission = vec3(0.0f);
 	if (texture(material.specular, tex_coord).r == 0.0) {
-		emission = vec3(texture(material.emission, tex_coord)) * (sin(time) + 1.0f);
+		emission = vec3(texture(material.emission, tex_coord)) * vec3(0.1f);
 	}
 
-	vec3 result	= ambient + (diffuse + specular) * attenuation + emission;
+	float theta		= dot(light_dir, normalize(-light.direction));
+	float intensity	= clamp((theta - light.outer_cutoff) / epsilon, 0.0, 1.0);
+	vec3 result	= (ambient + (diffuse + specular) * intensity * 2.0f) * attenuation + emission;
+
 	frag_color	= vec4(result, 1.0);
 }
