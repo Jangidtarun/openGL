@@ -53,7 +53,7 @@ void main() {
 
 	vec3 emission = vec3(0.0f);
 	if (texture(material.specular, tex_coord).r == 0.0) {
-		emission = vec3(texture(material.emission, tex_coord)) * vec3(2.0f) * (sin(time) + 1.0f);
+		emission = vec3(texture(material.emission, tex_coord)) * (sin(time) + 1.0f);
 	}
 
 	vec3 result	= ambient + (diffuse + specular) * attenuation + emission;
