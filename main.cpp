@@ -34,11 +34,23 @@ bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
 // light source
-SpotLight light = create_spot_light(cam.position,
+SpotLight spot_light = create_spot_light(cam.position,
 	cam.front,
 	12.0f,
 	14.0f,
+	glm::vec3(0.0f, 1.0f, 0.0f),
+	glm::vec3(0.1f),
 	glm::vec3(1.0f),
+	glm::vec3(1.0f));
+
+PointLight point_light = create_point_light(glm::vec3(0.0f),
+	glm::vec3(1.0f),
+	glm::vec3(0.1f),
+	glm::vec3(1.0f),
+	glm::vec3(1.0f));
+
+DirectionalLight dir_light = create_directional_light(glm::vec3(0.0f, 1.0f, 0.0f),
+	glm::vec3(1.0, 0.702, 0.102),
 	glm::vec3(0.1f),
 	glm::vec3(1.0f),
 	glm::vec3(1.0f));
@@ -187,8 +199,8 @@ int main() {
 	glm::vec3 cubePositions[10];
 	for (int i = 0; i < 10; i++) {
 		float angle = i * (2 * M_PI / 10);
-		float r = 2.0f;
-		cubePositions[i] = glm::vec3(r * cos(angle), r * sin(angle), -2.0f);
+		float r = 2.5f;
+		cubePositions[i] = glm::vec3(r * cos(angle), r * sin(angle), -1.0f);
 	}
 
 
@@ -226,7 +238,7 @@ int main() {
 
 
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.1, 0.1, 0.1, 1.0);
+		glClearColor(0.776, 0.494, 0.149, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		process_input(window);
 
@@ -253,18 +265,14 @@ int main() {
 		uniset_float(shader_program, "material.shininess",	gold.shininess);
 
 		// set the light
-		light.position = cam.position;
-		light.direction = cam.front;
-		uniset_vec3(shader_program, "light.position",	light.position);
-		uniset_vec3(shader_program, "light.direction",	light.direction);
-		uniset_float(shader_program, "light.cutoff", glm::cos(glm::radians(light.cutoff_angle)));
-		uniset_float(shader_program, "light.outer_cutoff", glm::cos(glm::radians(light.outer_cutoff_angle)));
-		uniset_vec3(shader_program, "light.ambient",	light.ambient);
-		uniset_vec3(shader_program, "light.diffuse",	light.diffuse);
-		uniset_vec3(shader_program, "light.specular",	light.specular);
-		uniset_float(shader_program, "light.kc", light.kc);
-		uniset_float(shader_program, "light.kl", light.kl);
-		uniset_float(shader_program, "light.kq", light.kq);
+		spot_light.position = cam.position;
+		spot_light.direction = cam.front;
+
+		point_light.position.z = 3 * sin(2 * glfwGetTime());
+
+		set_spot_light_uniforms(shader_program, "spot_light", spot_light);
+		set_point_light_uniforms(shader_program, "point_light", point_light);
+		set_directional_light_uniforms(shader_program, "dir_light", dir_light);
 
 		uniset_float(shader_program, "time", glfwGetTime());
 
@@ -279,19 +287,19 @@ int main() {
 		}
 
 		// light source shader program
-		// glUseProgram(shader_program_light_source);
+		glUseProgram(shader_program_light_source);
 
-		// model = glm::mat4(1.0f);
-		// model = glm::translate(model, light.position);
-		// model = glm::scale(model, glm::vec3(0.2f));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, point_light.position);
+		model = glm::scale(model, glm::vec3(0.2f));
 
-		// uniset_vec3(shader_program_light_source, "light_color", light.color);
-		// uniset_mat4(shader_program_light_source, "model", model);
-		// uniset_mat4(shader_program_light_source, "view", view);
-		// uniset_mat4(shader_program_light_source, "projection", proj);
+		uniset_vec3(shader_program_light_source, "light_color", point_light.color);
+		uniset_mat4(shader_program_light_source, "model", model);
+		uniset_mat4(shader_program_light_source, "view", view);
+		uniset_mat4(shader_program_light_source, "projection", proj);
 
-		// glBindVertexArray(light_vao);
-		// glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(light_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
