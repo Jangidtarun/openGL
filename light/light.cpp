@@ -1,21 +1,42 @@
 #include "light.h"
 
-Light
-create_light(glm::vec3 position, 
-		glm::vec3 light_color, 
-		glm::vec3 ambient_intensity, 
-		glm::vec3 diffuse_intensity, 
+PointLight
+create_point_light(glm::vec3 position,
+		glm::vec3 color,
+		glm::vec3 ambient_intensity,
+		glm::vec3 diffuse_intensity,
 		glm::vec3 specular) {
-	Light light;
+	PointLight light;
 
 	light.position			= position;
-	light.light_color		= light_color;
+	light.color				= color;
 	light.ambient_intensity	= ambient_intensity;
 	light.diffuse_intensity	= diffuse_intensity;
 
 	light.specular	= specular;
-	light.diffuse	= light.light_color	* light.ambient_intensity;
-	light.ambient	= light.diffuse		* light.diffuse_intensity;
+	light.diffuse	= light.color	* light.ambient_intensity;
+	light.ambient	= light.diffuse	* light.diffuse_intensity;
+
+	return light;
+}
+
+
+DirectionalLight
+create_directional_light(glm::vec3 direction,
+		glm::vec3 color,
+		glm::vec3 ambient_intensity,
+		glm::vec3 diffuse_intensity,
+		glm::vec3 specular) {
+	DirectionalLight light;
+
+	light.direction			= direction;
+	light.color				= color;
+	light.ambient_intensity	= ambient_intensity;
+	light.diffuse_intensity	= diffuse_intensity;
+
+	light.specular	= specular;
+	light.diffuse	= light.color	* light.ambient_intensity;
+	light.ambient	= light.diffuse	* light.diffuse_intensity;
 
 	return light;
 }
