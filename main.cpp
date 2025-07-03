@@ -25,31 +25,6 @@ Camera cam;
 bool mouse_first_in = true;
 glm::vec2 mouse_last_loc(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 
-// light source
-SpotLight spot_light = create_spot_light(cam.position,
-	cam.front,
-	12.0f,
-	14.0f,
-	glm::vec3(0.0f, 1.0f, 0.0f),
-	glm::vec3(0.1f),
-	glm::vec3(1.0f),
-	glm::vec3(1.0f));
-
-PointLight point_light = create_point_light(glm::vec3(0.0f),
-	glm::vec3(1.0f),
-	glm::vec3(0.1f),
-	glm::vec3(1.0f),
-	glm::vec3(1.0f));
-
-DirectionalLight dir_light = create_directional_light(glm::vec3(0.0f, 1.0f, 0.0f),
-	glm::vec3(1.0, 0.702, 0.102),
-	glm::vec3(0.1f),
-	glm::vec3(1.0f),
-	glm::vec3(1.0f));
-
-const char *vshader_light_source_path	= "res/shaders/light_source.vert";
-const char *fshader_light_source_path	= "res/shaders/light_source.frag";
-
 // animation
 float delta_time = 0.0f;
 float last_frame = 0.0f;
@@ -121,48 +96,7 @@ int main() {
 		uniset_mat4(shader_program, "view", view);
 		uniset_mat4(shader_program, "projection", proj);
 
-		// set the material
-		uniset_int(shader_program, "material.diffuse",	0);
-		uniset_int(shader_program, "material.specular",	1);
-		uniset_int(shader_program, "material.emission", 2);
-		uniset_float(shader_program, "material.shininess",	gold.shininess);
-
-		// set the light
-		spot_light.position = cam.position;
-		spot_light.direction = cam.front;
-
-		point_light.position.z = 3 * sin(2 * glfwGetTime());
-
-		set_spot_light_uniforms(shader_program, "spot_light", spot_light);
-		set_point_light_uniforms(shader_program, "point_light", point_light);
-		set_directional_light_uniforms(shader_program, "dir_light", dir_light);
-
-		uniset_float(shader_program, "time", glfwGetTime());
-
-		glBindVertexArray(vao);
-		for (int i = 0; i < 10; i++) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = i * 2 * M_PI / 10;
-			model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
-			uniset_mat4(shader_program, "model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-		// light source shader program
-		glUseProgram(shader_program_light_source);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, point_light.position);
-		model = glm::scale(model, glm::vec3(0.2f));
-
-		uniset_vec3(shader_program_light_source, "light_color", point_light.color);
-		uniset_mat4(shader_program_light_source, "model", model);
-		uniset_mat4(shader_program_light_source, "view", view);
-		uniset_mat4(shader_program_light_source, "projection", proj);
-
-		glBindVertexArray(light_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		draw_model(&backpack, shader_program);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
