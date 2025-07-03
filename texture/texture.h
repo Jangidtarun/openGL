@@ -3,7 +3,9 @@
 
 #include <glad/glad.h>
 
-#define STB_IMAGE_IMPLEMENTATION
+#include <iostream>
+#include <string>
+
 #include "../src/stb_image.h"
 
 unsigned int make_texture(const std::string texture_path, 
