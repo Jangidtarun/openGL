@@ -7,11 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "shader/shader.h"
 #include "camera/camera.h"
-#include "texture/texture.h"
-#include "materials/materials.h"
-#include "light/light.h"
+#include "model/model.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
