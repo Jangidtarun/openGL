@@ -58,9 +58,6 @@ int main() {
 	}
 
 	cam = create_camera();
-	// cam.position	= glm::vec3(1.1f, 1.2f, 3.3f);
-	// cam.up			= glm::normalize(glm::vec3(-0.086914f, 0.941746f, -0.3249f));
-	// cam.front		= glm::normalize(glm::vec3(-0.167422f, -0.33530f, -0.9271f));
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -69,8 +66,8 @@ int main() {
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
-	unsigned int vshader	= compile_vertex_shader(vshader_path);
-	unsigned int fshader	= compile_fragment_shader(fshader_path);
+	unsigned int vshader = compile_vertex_shader(vshader_path);
+	unsigned int fshader = compile_fragment_shader(fshader_path);
 	unsigned int shader_program	= create_shader_program(vshader, fshader);
 
 	Model backpack = init_model("res/models/backpack/backpack.obj");
@@ -89,7 +86,8 @@ int main() {
 
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view	= get_view_matrix(&cam);
-		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom), ASPECT_RATIO, 0.1f, 100.0f);
+		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom),
+				ASPECT_RATIO, 0.1f, 100.0f);
 
 		uniset_vec3(shader_program, "view_pos", cam.position);
 		uniset_mat4(shader_program, "model", model);
@@ -102,8 +100,6 @@ int main() {
 		glfwPollEvents();
 	}
 
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
 	glDeleteProgram(shader_program);
 	glfwDestroyWindow(window);
 	glfwTerminate();
