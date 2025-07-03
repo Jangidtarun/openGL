@@ -1,41 +1,45 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include <glad/glad.h>
+
 #include <glm/glm.hpp>
+
 #include <string>
 #include <vector>
 
-struct Vertex {
+#include "../shader/shader.h"
+
+typedef struct {
 	glm::vec3 position;
 	glm::vec3 normal;
-	glm::vec3 texcoords;
-};
+	glm::vec2 texcoords;
+} Vertex;
 
 
-struct Texture {
+typedef struct {
 	unsigned int id;
 	std::string type;
-};
+	std::string path;
+} Texture;
 
 
-struct Mesh {
+typedef struct {
 	// mesh data
-	std::vector<struct Vector> vertices;
+	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<struct Texture> textures;
+	std::vector<Texture> textures;
 
 	// render data
 	unsigned int vao, vbo, ebo;
-};
+} Mesh;
 
 
-struct Mesh
-init_mesh(std::vector<struct Vertex> vertices, 
+Mesh init_mesh(std::vector<Vertex> vertices, 
 		std::vector<unsigned int> indices,
-		std::vector<struct Texture> textures);
+		std::vector<Texture> textures);
 
-void draw_mesh(const struct Mesh &mesh, const unsigned int shader_program);
-
-void setup_mesh(struct Mesh &mesh);
+void draw_mesh(Mesh *mesh, const unsigned int shader_program);
+void setup_mesh(Mesh *mesh);
 
 #endif
