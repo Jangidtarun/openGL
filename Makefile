@@ -1,30 +1,48 @@
-CFLAGS 	= -Wall
-LIBS 	= -lglfw -lGL -ldl -Iinclude -lm
-SRC 	= main.cpp
-OUT 	= main
-CC 		= g++
-GLAD 	= src/glad.c
+# Compiler and flags
+CXX     := g++
+CXXFLAGS:= -Wall -Iinclude
 
-CAMERA_SRC	= camera/camera.cpp
-CAMERA_HEAD	= camera/camera.h
+# Libraries to link
+LDLIBS  := -lglfw -lGL -ldl -lm -lassimp
 
-LIGHT_SRC	= light/light.cpp
-LIGHT_HEAD	= light/light.h
+# Output file
+TARGET  := main
 
-SHADER_SRC	= shader/shader.cpp
-SHADER_HEAD	= shader/shader.h
+# Source files
+SRCS := \
+    main.cpp \
+    camera/camera.cpp \
+    light/light.cpp \
+    shader/shader.cpp \
+    helper/stringlib.cpp \
+    model/model.cpp \
+    mesh/mesh.cpp \
+    src/stb_image.cpp \
+	texture/texture.cpp \
+    src/glad.c
 
-TEXTURE_HEAD	= texture/texture.h
-MATERIALS_HEAD	= materials/materials.h
+# Object files (replace .cpp and .c with .o)
+OBJS := $(SRCS:.cpp=.o)
+OBJS := $(OBJS:.c=.o)
 
-STRINGLIB_HEAD = helper/stringlib.h
-STRINGLIB_SRC = helper/stringlib.cpp
+# Default target
+all: $(TARGET)
 
-DEPENDENCIES		= $(CAMERA_HEAD) $(LIGHT_HEAD) $(SHADER_HEAD) $(MATERIALS_HEAD) $(TEXTURE_HEAD) $(STRINGLIB_HEAD)
-DEPENDENCIES_SRC	= $(CAMERA_SRC) $(LIGHT_SRC) $(SHADER_SRC) $(STRINGLIB_SRC)
+# Linking
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ $(LDLIBS) -o $@
 
-$(OUT): $(SRC) $(DEPENDENCIES) $(DEPENDENCIES_SRC)
-	$(CC) $(CFLAGS) $(SRC) $(DEPENDENCIES_SRC) $(GLAD) $(LIBS) -o $(OUT)
+# Compile .cpp to .o
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Compile .c to .o
+%.o: %.c
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean
 clean:
-	rm -f $(OUT)
+	rm -f $(TARGET) $(OBJS)
+
+.PHONY: all clean
+
