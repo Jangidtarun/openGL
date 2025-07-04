@@ -14,7 +14,6 @@ SRCS := \
     camera/camera.cpp \
     light/light.cpp \
     shader/shader.cpp \
-    helper/stringlib.cpp \
     model/model.cpp \
     mesh/mesh.cpp \
     src/stb_image.cpp \
