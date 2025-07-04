@@ -58,33 +58,22 @@ unsigned int compile_vertex_shader(const char *vshader_path) {
 }
 
 
-char *load_shader(const char *shader_path) {
-    char *shader_code;
+std::string load_shader(const std::string shader_path) {
+    std::string shader_code;
+	std::ifstream shader_file;
 
-    FILE *shader_file = fopen(shader_path, "r");
-    if (!shader_file) {
-        fprintf(stderr, "ERROR:LOADING:SHADER:FAILED\n");
-        return NULL;
-    }
+	shader_file.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+	try {
+		shader_file.open(shader_path);
+		std::stringstream shader_stream;
+		shader_stream << shader_file.rdbuf();
+		shader_file.close();
+		shader_code = shader_stream.str();
+	} catch (std::ifstream::failure &e) {
+		std::cout << "ERROR:SHADER:Failed to read file:\n" << 
+			e.what() << std::endl;
+	}
 
-    // seek to end to determine file size
-    fseek(shader_file, 0, SEEK_END);
-    long file_size = ftell(shader_file);
-    rewind(shader_file);
-
-    // allocate buffer (+1 for null terminator)
-    shader_code = (char *)malloc(file_size + 1);
-    if (!shader_code) {
-        fprintf(stderr, "ERROR:ALLOCATION:SHADER:BUFFER:FAILED\n");
-        fclose(shader_file);
-        return NULL;
-    }
-
-    // read file into buffer
-    size_t read_size = fread(shader_code, 1, file_size, shader_file);
-    shader_code[read_size] = '\0';
-
-    fclose(shader_file);
     return shader_code;
 }
 
