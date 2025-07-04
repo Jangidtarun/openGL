@@ -24,7 +24,7 @@ typedef struct {
 	std::vector<Texture> textures_loaded;
 } Model;
 
-Model init_model(const char *path);
+Model init_model(const std::string path);
 void draw_model(Model *model, const unsigned int shader_program);
 
 void load_model(Model *model, const std::string path);

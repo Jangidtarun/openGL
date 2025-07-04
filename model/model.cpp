@@ -1,6 +1,6 @@
 #include "model.h"
 
-Model init_model(const char *path) {
+Model init_model(const std::string path) {
 	Model m;
 	load_model(&m, path);
 	return m;
