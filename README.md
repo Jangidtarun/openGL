@@ -5,11 +5,9 @@ Chapter 12 results
 Phong Lighting
 ![Phong Lighting](https://github.com/Jangidtarun/openGL/blob/oden/results/phong_lighting.png)
 
-
 Chapter 15 results
 Lighting Maps
 ![Lighting Maps](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-15.png)
-
 
 Chapter 17 results
 Box tesserect in a deset with green spotlight
@@ -24,3 +22,7 @@ Chapter 22 results
 Depth testing
 ![screen space depth testing](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-22-depth-value-visualization.png)
 ![linearized depth testing](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-22-depth-buffer-visualization%20(linearized).png)
+
+Chapter 23 results
+Stencil testing
+![object outline](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-23-stencil-test-results%20(object%20outline).png)
