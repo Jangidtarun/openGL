@@ -19,6 +19,9 @@ const unsigned int WINDOW_WIDTH		= 1000;
 const float	ASPECT_RATIO			= (float) WINDOW_WIDTH / WINDOW_HEIGHT;
 const char *WINDOW_TITLE			= "Depth Testing";
 
+const float NEAR_PLANE = 0.1f;
+const float FAR_PLANE = 100.0f;
+
 // res file paths
 const std::string vshader_path	= "res/shaders/shader.vert";
 const std::string fshader_path	= "res/shaders/shader.frag";
