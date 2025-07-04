@@ -14,3 +14,8 @@ Lighting Maps
 Chapter 17 results
 Box tesserect in a deset with green spotlight
 ![Multiple lights demo](https://github.com/Jangidtarun/openGL/blob/oden/results/multiple%20lights%20demo.webm)
+
+Chapter 21 results
+Model loading
+![Backpack](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-21-model-loading.png)
+![Backpack with light](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-21-model-loading-with-light.png)
