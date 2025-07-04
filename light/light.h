@@ -5,6 +5,8 @@
 #include "../shader/shader.h"
 #include "../helper/stringlib.h"
 
+#include <string>
+
 // defaults
 const glm::vec3 DEFAULT_POINT_LIGHT_POSITION	= glm::vec3(1.0f);
 const glm::vec3 DEFAULT_LIGHT_COLOR		= glm::vec3(1.0f);
@@ -115,15 +117,15 @@ create_directional_light(glm::vec3 direction	= DEFAULT_LIGHT_DIRECTION,
 
 
 void set_spot_light_uniforms(unsigned int shader_program,
-	const char *spotlight_uniform_name,
+	const std::string light_uniform_name,
 	SpotLight &light);
 
 void set_point_light_uniforms(unsigned int shader_program,
-	const char *pointlight_uniform_name,
+	const std::string light_uniform_name,
 	PointLight &light);
 
 void set_directional_light_uniforms(unsigned int shader_program,
-	const char *dirlight_uniform_name,
+	const std::string light_uniform_name,
 	DirectionalLight &light);
 
 #endif
