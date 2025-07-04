@@ -19,3 +19,8 @@ Chapter 21 results
 Model loading
 ![Backpack](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-21-model-loading.png)
 ![Backpack with light](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-21-model-loading-with-light.png)
+
+Chapter 22 results
+Depth testing
+![screen space depth testing](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-22-depth-value-visualization.png)
+![linearized depth testing](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-22-depth-buffer-visualization%20(linearized).png)
