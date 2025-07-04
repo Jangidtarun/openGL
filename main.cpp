@@ -17,9 +17,10 @@ const unsigned int WINDOW_WIDTH		= 1000;
 const float	ASPECT_RATIO			= (float) WINDOW_WIDTH / WINDOW_HEIGHT;
 const char *WINDOW_TITLE			= "Lighting";
 
-// shader file paths
-const char *vshader_path	= "res/shaders/shader.vert";
-const char *fshader_path	= "res/shaders/shader.frag";
+// res file paths
+const std::string vshader_path	= "res/shaders/shader.vert";
+const std::string fshader_path	= "res/shaders/shader.frag";
+const std::string backpack_file_path	= "res/models/backpack/backpack.obj";
 
 // camera
 Camera cam;
@@ -71,7 +72,7 @@ int main() {
 	unsigned int fshader = compile_fragment_shader(fshader_path);
 	unsigned int shader_program	= create_shader_program(vshader, fshader);
 
-	Model backpack = init_model("res/models/backpack/backpack.obj");
+	Model backpack = init_model(backpack_file_path);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(COLOR_BLACK);
