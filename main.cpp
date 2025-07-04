@@ -8,20 +8,20 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "camera/camera.h"
+#include "texture/texture.h"
+#include "shader/shader.h"
 #include "model/model.h"
 #include "colors/colors.h"
-#include "light/light.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
 const unsigned int WINDOW_WIDTH		= 1000;
 const float	ASPECT_RATIO			= (float) WINDOW_WIDTH / WINDOW_HEIGHT;
-const char *WINDOW_TITLE			= "Lighting";
+const char *WINDOW_TITLE			= "Depth Testing";
 
 // res file paths
 const std::string vshader_path	= "res/shaders/shader.vert";
 const std::string fshader_path	= "res/shaders/shader.frag";
-const std::string backpack_file_path	= "res/models/backpack/backpack.obj";
 
 // camera
 Camera cam;
@@ -66,6 +66,7 @@ int main() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -74,18 +75,93 @@ int main() {
 	unsigned int fshader = compile_fragment_shader(fshader_path);
 	unsigned int shader_program	= create_shader_program(vshader, fshader);
 
-	Model backpack = init_model(backpack_file_path);
-	PointLight plight = create_point_light(glm::vec3(1.0f), 
-			glm::vec3(1.0f), 
-			glm::vec3(0.2f));
+	float cubeVertices[] = {
+        // positions          // texture Coords
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+
+    float planeVertices[] = {
+        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+         5.0f, -0.5f, -5.0f,  2.0f, 2.0f								
+    };
+
+    // cube VAO
+    unsigned int cubeVAO, cubeVBO;
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &cubeVBO);
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+    // plane VAO
+    unsigned int planeVAO, planeVBO;
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindVertexArray(planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+	unsigned int cube_texture = make_texture("res/textures/container2.png", ".");
+	unsigned int floor_texture = make_texture("res/textures/wall.jpg", ".");
 
 	glUseProgram(shader_program);
-	uniset_vec3(shader_program, "plight.ambient", plight.ambient);
-	uniset_vec3(shader_program, "plight.diffuse", plight.diffuse);
-	uniset_vec3(shader_program, "plight.specular", plight.specular);
-	uniset_float(shader_program, "plight.kc", plight.kc);
-	uniset_float(shader_program, "plight.kl", plight.kl);
-	uniset_float(shader_program, "plight.kq", plight.kq);
+	uniset_int(shader_program, "texture1", 0);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(COLOR_BLACK);
@@ -101,19 +177,35 @@ int main() {
 		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom),
 				ASPECT_RATIO, 0.1f, 100.0f);
 
-		// plight.position.x = 5 * sin(0.5 * curr_frame);
-
-		uniset_vec3(shader_program, "plight.position", plight.position);
-		uniset_vec3(shader_program, "view_pos", cam.position);
-		uniset_mat4(shader_program, "model", model);
 		uniset_mat4(shader_program, "view", view);
 		uniset_mat4(shader_program, "projection", proj);
 
-		draw_model(&backpack, shader_program);
+		glBindVertexArray(cubeVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, cube_texture);
+		
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+		uniset_mat4(shader_program, "model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+		uniset_mat4(shader_program, "model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		glBindVertexArray(planeVAO);
+		glBindTexture(GL_TEXTURE_2D, floor_texture);
+		uniset_mat4(shader_program, "model", glm::mat4(1.0f));
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteVertexArrays(1, &cubeVAO);
+	glDeleteVertexArrays(1, &planeVAO);
+	glDeleteBuffers(1, &cubeVBO);
+	glDeleteBuffers(1, &planeVBO);
 
 	glDeleteProgram(shader_program);
 	glfwDestroyWindow(window);
