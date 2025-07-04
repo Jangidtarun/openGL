@@ -20,10 +20,11 @@ unsigned int create_shader_program(const unsigned int vert_shader, const unsigne
 }
 
 
-unsigned int compile_fragment_shader(const char *fshader_path) {
-	const char *fragment_shader_code = load_shader(fshader_path);
+unsigned int compile_fragment_shader(const std::string fshader_path) {
+	const std::string fragment_shader_code = load_shader(fshader_path);
     unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_code, NULL);
+	const char *source = fragment_shader_code.c_str();
+    glShaderSource(fragment_shader, 1, &source, NULL);
     glCompileShader(fragment_shader);
 
     int success;
@@ -39,10 +40,11 @@ unsigned int compile_fragment_shader(const char *fshader_path) {
 }
 
 
-unsigned int compile_vertex_shader(const char *vshader_path) {
-	const char *vertex_shader_code = load_shader(vshader_path);
+unsigned int compile_vertex_shader(const std::string vshader_path) {
+	const std::string vertex_shader_code = load_shader(vshader_path);
     unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_code, NULL);
+	const char *source = vertex_shader_code.c_str();
+    glShaderSource(vertex_shader, 1, &source, NULL);
     glCompileShader(vertex_shader);
 
     int success;
@@ -78,21 +80,27 @@ std::string load_shader(const std::string shader_path) {
 }
 
 
-void uniset_float(unsigned int shader_program, const char *name, const float val) {
-	glUniform1f(glGetUniformLocation(shader_program, name), val);
+void uniset_float(unsigned int shader_program, const std::string name, 
+		const float val) {
+	glUniform1f(glGetUniformLocation(shader_program, name.c_str()), val);
 }
 
 
-void uniset_vec3(unsigned int shader_program, const char *name, const glm::vec3 vec) {
-	glUniform3fv(glGetUniformLocation(shader_program, name), 1, glm::value_ptr(vec));
+void uniset_vec3(unsigned int shader_program, const std::string name, 
+		const glm::vec3 vec) {
+	glUniform3fv(glGetUniformLocation(shader_program, name.c_str()), 
+			1, glm::value_ptr(vec));
 }
 
 
-void uniset_mat4(unsigned int shader_program, const char *name, const glm::mat4 mat) {
-	glUniformMatrix4fv(glGetUniformLocation(shader_program, name), 1, GL_FALSE, glm::value_ptr(mat));
+void uniset_mat4(unsigned int shader_program, const std::string name, 
+		const glm::mat4 mat) {
+	glUniformMatrix4fv(glGetUniformLocation(shader_program, name.c_str()), 
+			1, GL_FALSE, glm::value_ptr(mat));
 }
 
 
-void uniset_int(unsigned int shader_program, const char *name, const int val) {
-	glUniform1i(glGetUniformLocation(shader_program, name), val);
+void uniset_int(unsigned int shader_program, const std::string name, 
+		const int val) {
+	glUniform1i(glGetUniformLocation(shader_program, name.c_str()), val);
 }
