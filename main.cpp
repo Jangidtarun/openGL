@@ -19,9 +19,13 @@ const unsigned int WINDOW_WIDTH		= 1000;
 const float	ASPECT_RATIO			= (float) WINDOW_WIDTH / WINDOW_HEIGHT;
 const char *WINDOW_TITLE			= "Depth Testing";
 
+const float NEAR_PLANE = 0.1f;
+const float FAR_PLANE = 100.0f;
+
 // res file paths
 const std::string vshader_path	= "res/shaders/shader.vert";
 const std::string fshader_path	= "res/shaders/shader.frag";
+const std::string stencil_fshader_path = "res/shaders/stencil_shader.frag";
 
 // camera
 Camera cam;
@@ -67,6 +71,10 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -74,6 +82,11 @@ int main() {
 	unsigned int vshader = compile_vertex_shader(vshader_path);
 	unsigned int fshader = compile_fragment_shader(fshader_path);
 	unsigned int shader_program	= create_shader_program(vshader, fshader);
+
+	unsigned int stencil_fshader = 
+		compile_fragment_shader(stencil_fshader_path);
+	unsigned int stencil_shader_program = create_shader_program(vshader, 
+			stencil_fshader);
 
 	float cubeVertices[] = {
         // positions          // texture Coords
@@ -164,39 +177,85 @@ int main() {
 	uniset_int(shader_program, "texture1", 0);
 
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(COLOR_BLACK);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		float curr_frame = static_cast<float>(glfwGetTime());
+		delta_time = curr_frame - last_frame;
+		last_frame = curr_frame;
+
 		process_input(window);
 
-		float curr_frame = static_cast<float>(glfwGetTime());
-		delta_time	= curr_frame - last_frame;
-		last_frame	= curr_frame;
+		glClearColor(COLOR_BLACK);
+		glClear(GL_COLOR_BUFFER_BIT |
+				GL_DEPTH_BUFFER_BIT |
+				GL_STENCIL_BUFFER_BIT);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view	= get_view_matrix(&cam);
-		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom),
-				ASPECT_RATIO, 0.1f, 100.0f);
+		glm::mat4 view = get_view_matrix(&cam);
+		glm::mat4 projection = glm::perspective(glm::radians(cam.zoom), 
+				ASPECT_RATIO, NEAR_PLANE, FAR_PLANE);
+		
+		glUseProgram(stencil_shader_program);
+		uniset_mat4(stencil_shader_program, "view", view);
+		uniset_mat4(stencil_shader_program, "projection", projection);
 
+		glUseProgram(shader_program);
 		uniset_mat4(shader_program, "view", view);
-		uniset_mat4(shader_program, "projection", proj);
+		uniset_mat4(shader_program, "projection", projection);
+		
+		glStencilMask(0x00);
+
+		// draw floor
+		glBindVertexArray(planeVAO);
+		glBindTexture(GL_TEXTURE_2D, floor_texture);
+		uniset_mat4(shader_program, "model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		// draw cube (1st pass)
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
 
 		glBindVertexArray(cubeVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cube_texture);
-		
+
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
 		uniset_mat4(shader_program, "model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
 		uniset_mat4(shader_program, "model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glBindVertexArray(planeVAO);
-		glBindTexture(GL_TEXTURE_2D, floor_texture);
-		uniset_mat4(shader_program, "model", glm::mat4(1.0f));
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// draw cube (2nd pass)
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+
+		glUseProgram(stencil_shader_program);
+		float scale = 1.1f;
+
+		glBindVertexArray(cubeVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, cube_texture);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+		model = glm::scale(model, glm::vec3(scale));
+		uniset_mat4(stencil_shader_program, "model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(scale));
+		uniset_mat4(stencil_shader_program, "model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0);
+		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+		glEnable(GL_DEPTH_TEST);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
