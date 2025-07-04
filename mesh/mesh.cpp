@@ -29,7 +29,7 @@ void draw_mesh(Mesh *mesh, const unsigned int shader_program) {
 			number = std::to_string(total_specular++);
 		}
 
-		uniset_int(shader_program, ("material." + name + number).c_str(), i);
+		uniset_int(shader_program, "material." + name + number, i);
 		glBindTexture(GL_TEXTURE_2D, mesh->textures[i].id);
 	}
 	glActiveTexture(GL_TEXTURE0);
