@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 #include "../shader/shader.h"
-#include "../helper/stringlib.h"
 
 #include <string>
 
@@ -11,7 +10,7 @@
 const glm::vec3 DEFAULT_POINT_LIGHT_POSITION	= glm::vec3(1.0f);
 const glm::vec3 DEFAULT_LIGHT_COLOR		= glm::vec3(1.0f);
 const glm::vec3 DEFAULT_LIGHT_AMB_INTEN	= glm::vec3(1.0f);
-const glm::vec3 DEFAULT_LIGHT_DIF_INTEN	= glm::vec3(0.5f);
+const glm::vec3 DEFAULT_LIGHT_DIF_INTEN	= glm::vec3(1.0f);
 const glm::vec3 DEFAULT_LIGHT_SPE_INTEN = glm::vec3(1.0f);
 const glm::vec3 DEFAULT_LIGHT_DIRECTION = glm::vec3(0.0f, -1.0f, 0.0f);
 const float DEFAULT_SPOTLIGHT_CUTOFF_ANGLE = 12.0f;

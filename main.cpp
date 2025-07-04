@@ -10,6 +10,7 @@
 #include "camera/camera.h"
 #include "model/model.h"
 #include "colors/colors.h"
+#include "light/light.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -43,7 +44,8 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 
+			WINDOW_TITLE, NULL, NULL);
 	if (!window) {
 		std::cout << "Failed to create GLFW window\n";
 		glfwTerminate();
@@ -73,6 +75,17 @@ int main() {
 	unsigned int shader_program	= create_shader_program(vshader, fshader);
 
 	Model backpack = init_model(backpack_file_path);
+	PointLight plight = create_point_light(glm::vec3(1.0f), 
+			glm::vec3(1.0f), 
+			glm::vec3(0.2f));
+
+	glUseProgram(shader_program);
+	uniset_vec3(shader_program, "plight.ambient", plight.ambient);
+	uniset_vec3(shader_program, "plight.diffuse", plight.diffuse);
+	uniset_vec3(shader_program, "plight.specular", plight.specular);
+	uniset_float(shader_program, "plight.kc", plight.kc);
+	uniset_float(shader_program, "plight.kl", plight.kl);
+	uniset_float(shader_program, "plight.kq", plight.kq);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(COLOR_BLACK);
@@ -83,14 +96,14 @@ int main() {
 		delta_time	= curr_frame - last_frame;
 		last_frame	= curr_frame;
 
-		// container shader program
-		glUseProgram(shader_program);
-
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view	= get_view_matrix(&cam);
 		glm::mat4 proj	= glm::perspective(glm::radians(cam.zoom),
 				ASPECT_RATIO, 0.1f, 100.0f);
 
+		// plight.position.x = 5 * sin(0.5 * curr_frame);
+
+		uniset_vec3(shader_program, "plight.position", plight.position);
 		uniset_vec3(shader_program, "view_pos", cam.position);
 		uniset_mat4(shader_program, "model", model);
 		uniset_mat4(shader_program, "view", view);
