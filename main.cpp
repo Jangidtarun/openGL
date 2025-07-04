@@ -9,6 +9,7 @@
 
 #include "camera/camera.h"
 #include "model/model.h"
+#include "colors/colors.h"
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -73,7 +74,7 @@ int main() {
 	Model backpack = init_model("res/models/backpack/backpack.obj");
 
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.776, 0.494, 0.149, 1.0);
+		glClearColor(COLOR_BLACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		process_input(window);
 
