@@ -26,3 +26,6 @@ Depth testing
 Chapter 23 results
 Stencil testing
 ![object outline](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-23-stencil-test-results%20(object%20outline).png)
+
+Chapter 24 results - See through the window
+![Blending in opengl](https://github.com/Jangidtarun/openGL/blob/oden/results/chapter-24-blending.png)
