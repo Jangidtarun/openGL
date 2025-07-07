@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -12,6 +10,9 @@
 #include "shader/shader.h"
 #include "model/model.h"
 #include "colors/colors.h"
+
+#include <iostream>
+#include <map>
 
 // window settings
 const unsigned int WINDOW_HEIGHT	= 750;
@@ -70,6 +71,9 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -124,17 +128,8 @@ int main() {
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-//     float grassVertices[] = {
-//          5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
-//         -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-//         -5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
-// 
-//          5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
-//         -5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
-//          5.0f, -0.5f, -5.0f,  1.0f, 1.0f								
-//     };
 
-	float grassVertices[] = {
+	float window_vertices[] = {
 		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
 		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
@@ -187,23 +182,23 @@ int main() {
     glGenBuffers(1, &grassVBO);
     glBindVertexArray(grassVAO);
     glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(grassVertices), &grassVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(window_vertices), &window_vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
 
-	std::vector<glm::vec3> vegetation;
-	vegetation.push_back(glm::vec3(-1.0f, 0.0f, -0.48f));
-	vegetation.push_back(glm::vec3( 2.0f, 0.0f, 0.51f));
-	vegetation.push_back(glm::vec3( 0.0f, 0.0f, 0.7f));
-	vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
-	vegetation.push_back(glm::vec3( 0.5f, 0.0f, -0.6f));
+	std::vector<glm::vec3> windows;
+	windows.push_back(glm::vec3(-1.0f, 0.0f, -0.48f));
+	windows.push_back(glm::vec3( 2.0f, 0.0f, 0.51f));
+	windows.push_back(glm::vec3( 0.0f, 0.0f, 0.7f));
+	windows.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+	windows.push_back(glm::vec3( 0.5f, 0.0f, -0.6f));
 
 	unsigned int cube_texture = make_texture("res/textures/container2.png", ".");
 	unsigned int floor_texture = make_texture("res/textures/wall.jpg", ".");
-	unsigned int grass_texture = make_texture("res/textures/grass.png", ".");
+	unsigned int grass_texture = make_texture("res/textures/blending_transparent_window.png", ".");
 
 	glUseProgram(shader_program);
 	uniset_int(shader_program, "texture1", 0);
@@ -236,17 +231,6 @@ int main() {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
-		glBindVertexArray(grassVAO);
-		glBindTexture(GL_TEXTURE_2D, grass_texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		for (auto &v: vegetation) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, v);
-			uniset_mat4(shader_program, "model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-
 
 		// draw cube (1st pass)
 		glBindVertexArray(cubeVAO);
@@ -262,6 +246,26 @@ int main() {
 		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
 		uniset_mat4(shader_program, "model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		glBindVertexArray(grassVAO);
+		glBindTexture(GL_TEXTURE_2D, grass_texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		std::map<float, glm::vec3> sorted;
+		for (auto &window_pos: windows) {
+			float dist = glm::length(cam.position - window_pos);
+			sorted[dist] = window_pos;
+		}
+
+		std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin();
+		while (it != sorted.rend()) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, it->second);
+			uniset_mat4(shader_program, "model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			it++;
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
